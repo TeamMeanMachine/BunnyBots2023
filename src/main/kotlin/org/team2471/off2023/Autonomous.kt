@@ -1,4 +1,4 @@
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
 import edu.wpi.first.networktables.NetworkTableEvent
 import edu.wpi.first.networktables.NetworkTableInstance

@@ -1,6 +1,6 @@
 @file:Suppress("unused")
 
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
 object Talons {
 
@@ -8,14 +8,14 @@ object Talons {
 
 
 object Sparks {
-    const val FRONT_LEFT_STEER = 31
-    const val FRONT_LEFT_DRIVE = 32
-    const val FRONT_RIGHT_STEER = 33
-    const val FRONT_RIGHT_DRIVE = 34
-    const val REAR_RIGHT_STEER = 35
-    const val REAR_RIGHT_DRIVE = 36
-    const val REAR_LEFT_STEER = 37
-    const val REAR_LEFT_DRIVE = 38
+    const val FRONT_LEFT_STEER = 99
+    const val FRONT_LEFT_DRIVE = 99
+    const val FRONT_RIGHT_STEER = 99
+    const val FRONT_RIGHT_DRIVE = 99
+    const val REAR_RIGHT_STEER = 99
+    const val REAR_RIGHT_DRIVE = 99
+    const val REAR_LEFT_STEER = 99
+    const val REAR_LEFT_DRIVE = 99
 }
 
 object AnalogSensors {
@@ -23,10 +23,10 @@ object AnalogSensors {
 }
 
 object DigitalSensors {
-    const val REAR_RIGHT = 0
-    const val REAR_LEFT = 1
-    const val FRONT_RIGHT = 2
-    const val FRONT_LEFT = 3
+    const val REAR_RIGHT = 99
+    const val REAR_LEFT = 99
+    const val FRONT_RIGHT = 99
+    const val FRONT_LEFT = 99
 }
 
 object Falcons {

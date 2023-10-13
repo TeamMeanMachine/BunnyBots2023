@@ -1,4 +1,4 @@
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
 import edu.wpi.first.wpilibj.DriverStation
 import org.jetbrains.kotlin.gradle.utils.`is`
@@ -21,10 +21,10 @@ object OI : Subsystem("OI") {
     private val deadBandOperator = 0.1
 
     private val driveTranslationX: Double
-        get() = (if (FieldManager.isRedAlliance) 1.0 else -1.0) * driverController.leftThumbstickX.deadband(deadBandDriver).squareWithSign()
+        get() = driverController.leftThumbstickX.deadband(deadBandDriver).squareWithSign()
 
     private val driveTranslationY: Double
-        get() = (if (FieldManager.isRedAlliance) -1.0 else 1.0) * driverController.leftThumbstickY.deadband(deadBandDriver).squareWithSign()
+        get() = driverController.leftThumbstickY.deadband(deadBandDriver).squareWithSign()
 
     val driveTranslation: Vector2
         get() = Vector2(driveTranslationX, driveTranslationY) //does owen want this cubed?
@@ -61,7 +61,6 @@ object OI : Subsystem("OI") {
             Drive.zeroGyro();
             Drive.initializeSteeringMotors()
         }
-        driverController::start.whenTrue { Drive.calibrateRobotPosition() }
         driverController::x.whenTrue { Drive.xPose() }
     }
 }

@@ -1,8 +1,7 @@
 @file:JvmName("Main")
 
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
-import Off____.BuildConfig
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
@@ -11,7 +10,7 @@ import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.MeanlibRobot
 import org.team2471.frc.lib.motion.following.demoMode
 import org.team2471.frc.lib.units.degrees
-import org.team2471.off2023.testing.*
+import org.team2471.bunnybots2023.testing.*
 import java.net.NetworkInterface
 
 
@@ -43,11 +42,8 @@ object Robot : MeanlibRobot() {
             println("RANDOM NUMBER: ${Math.random()}")
         }
         println("NEVER GONNA GIVE YOU UP")
-        println(BuildConfig.BUILD_TIME)
 
-        FieldManager
         OI
-        println("Field Manager Active! Is Red ${FieldManager.isRedAlliance}")
         Drive
         println("Activating Drive!")
         Drive.zeroGyro()
@@ -59,7 +55,6 @@ object Robot : MeanlibRobot() {
 
     override suspend fun enable() {
         println("starting enable")
-        FieldManager.beforeFirstEnable = false
         Drive.enable()
         println("field centric? ${SmartDashboard.getBoolean("Use Gyro", true) && !DriverStation.isAutonomous()}")
         println("ending enable")

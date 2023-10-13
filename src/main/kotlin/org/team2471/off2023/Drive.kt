@@ -1,4 +1,4 @@
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
 import edu.wpi.first.networktables.NetworkTableEntry
 import edu.wpi.first.networktables.NetworkTableInstance
@@ -27,7 +27,7 @@ import kotlin.math.min
 
 @OptIn(DelicateCoroutinesApi::class)
 object Drive : Subsystem("Drive"), SwerveDrive {
-    val robotHalfWidth = (32.0/2.0).inches //<- THIS VALUE IS WRONG
+    val robotHalfWidth = (32.0/2.0).inches //<- THIS VALUE IS WRONG 10/12/2023
     val table = NetworkTableInstance.getDefault().getTable(name)
     val navXGyroEntry = table.getEntry("NavX Gyro")
 
@@ -37,9 +37,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     val odometer3Entry = table.getEntry("Odometer 3")
 
     val useGyroEntry = table.getEntry("Use Gyro")
-    val angleToNodeEntry = table.getEntry("Angle To Node")
-    val demoBoundingBoxEntry = table.getEntry("Demo Bounding Box")
-    val demoAprilLookingAtEntry = table.getEntry("Demo Look At Tags")
+
+    val plannedPathEntry = table.getEntry("Planned Path")
+    val actualRouteEntry = table.getEntry("Actual Route")
 
     val rateCurve = MotionCurve()
 
@@ -107,8 +107,6 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     override var headingSetpoint = 0.0.degrees
 
     var angleToNode: Angle = 0.0.degrees
-    val demoBondingBox: Boolean
-        get() = demoBoundingBoxEntry.getBoolean(false)
 
     override val parameters: SwerveParameters = SwerveParameters(
         gyroRateCorrection = 0.0,
@@ -123,8 +121,8 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     override val carpetFlow = Vector2(0.0, 1.0)
     override val kCarpet = 0.0234 // how much downstream and upstream carpet directions affect the distance, for no effect, use  0.0 (2.5% more distance downstream)
     override val kTread = 0.0 //.04 // how much of an effect treadWear has on distance (fully worn tread goes 4% less than full tread)  0.0 for no effect
-    override val plannedPath: NetworkTableEntry
-        get() = table.getEntry("")
+    override val plannedPath: NetworkTableEntry = plannedPathEntry
+    override val actualRoute: NetworkTableEntry = actualRouteEntry
 
     val autoPDController = PDConstantFController(0.015, 0.04, 0.05)
     val teleopPDController =  PDConstantFController(0.012, 0.09, 0.05)
@@ -167,8 +165,6 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 xEntry.setDouble(x)
                 yEntry.setDouble(y)
                 headingEntry.setDouble(heading.asDegrees)
-                val poseWPI = FieldManager.convertTMMtoWPI(x.feet, y.feet, heading)
-                poseEntry.setDoubleArray(doubleArrayOf(poseWPI.x, poseWPI.y, poseWPI.rotation.degrees))
             }
         }
     }
@@ -194,8 +190,8 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     }
 
     fun zeroGyro() {
-        heading = if (FieldManager.isBlueAlliance) 180.0.degrees else 0.0.degrees
-        println("zeroed heading to $heading  alliance blue? ${FieldManager.isBlueAlliance}")
+        heading = if (AutoChooser.redSide) 180.0.degrees else 0.0.degrees
+        println("zeroed heading to $heading  alliance blue? ${AutoChooser.redSide}")
     }
 
     override suspend fun default() {
@@ -208,9 +204,6 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 useGyroEntry.setBoolean(true)
             }
             val useGyro2 = useGyroEntry.getBoolean(true) && !DriverStation.isAutonomous()
-            if (FieldManager.homeField) {
-                angleToNodeEntry.setDouble(angleToNode.asDegrees)
-            }
             drive(
                 OI.driveTranslation * maxTranslation,
                 turn,
@@ -374,12 +367,6 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             module.setAngleOffset()
         }
         initializeSteeringMotors()
-    }
-
-
-    suspend fun calibrateRobotPosition() = use(Drive) {
-        position = Vector2(-11.5, if (FieldManager.isBlueAlliance) 21.25 else -21.25)
-        zeroGyro()
     }
 }
 
