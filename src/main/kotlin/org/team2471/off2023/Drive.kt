@@ -27,7 +27,7 @@ import kotlin.math.min
 
 @OptIn(DelicateCoroutinesApi::class)
 object Drive : Subsystem("Drive"), SwerveDrive {
-    val robotHalfWidth = (32.0/2.0).inches //<- THIS VALUE IS WRONG 10/12/2023
+    val robotHalfWidth = (32.0/2.0).inches //<- THIS VALUE IS WRONG!!!
     val table = NetworkTableInstance.getDefault().getTable(name)
     val navXGyroEntry = table.getEntry("NavX Gyro")
 
