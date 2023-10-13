@@ -30,7 +30,8 @@ object DigitalSensors {
 }
 
 object Falcons {
-
+    const val SHOOTER = 99
+    const val SHOOTER_TWO = 99
 }
 
 object CANCoders {

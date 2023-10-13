@@ -12,4 +12,6 @@ object Turret {
     val turretAngle: Angle
         get() = 0.0.degrees
 
+    var turretSetpoint = null
+
 }
