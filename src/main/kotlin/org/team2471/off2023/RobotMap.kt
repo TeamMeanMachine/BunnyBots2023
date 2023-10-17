@@ -3,7 +3,13 @@
 package org.team2471.bunnybots2023
 
 object Talons {
-
+    const val FRONT_INTAKE = 99
+    const val LEFT_INTAKE = 99
+    const val RIGHT_INTAKE = 99
+    const val HOPPER_UPTAKE = 99
+    const val HOPPER_CONVEYOR = 99
+    const val SHOOTER_ONE = 99
+    const val SHOOTER_TWO = 99
 
 }
 
@@ -20,6 +26,8 @@ object Sparks {
 }
 
 object AnalogSensors {
+    const val SHOOTER_ENCODER = 99
+    const val TURRET_ENCODER = 99
 
 }
 
@@ -31,8 +39,8 @@ object DigitalSensors {
 }
 
 object Falcons {
-    const val SHOOTER = 99
-    const val SHOOTER_TWO = 99
+    const val TURRET_ONE = 99
+    const val TURRET_TWO = 99
 }
 
 object CANCoders {
