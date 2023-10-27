@@ -36,6 +36,9 @@ object DigitalSensors {
     const val REAR_LEFT = 99
     const val FRONT_RIGHT = 99
     const val FRONT_LEFT = 99
+
+    const val HOPPER_LOW = 99
+    const val HOPPER_HIGH = 99
 }
 
 object Falcons {

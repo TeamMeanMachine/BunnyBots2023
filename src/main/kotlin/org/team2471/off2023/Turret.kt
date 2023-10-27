@@ -5,10 +5,11 @@ import org.team2471.bunnybots2023.AnalogSensors
 import org.team2471.bunnybots2023.Falcons
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
+import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.degrees
 
-object Turret {
+object Turret : Subsystem("Turret") {
     val turningMotorOne = MotorController(FalconID(Falcons.TURRET_ONE))
     val turningMotorTwo = MotorController(FalconID(Falcons.TURRET_TWO))
     val turretEncoder = AnalogInput(AnalogSensors.TURRET_ENCODER)
