@@ -1,5 +1,6 @@
 package org.team2471.off2023
 
+import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.PneumaticsModuleType
 import edu.wpi.first.wpilibj.Solenoid
