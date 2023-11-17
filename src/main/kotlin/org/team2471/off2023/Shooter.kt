@@ -16,12 +16,11 @@ object Shooter : Subsystem("Shooter") {
     val shooterMotorTwo = MotorController(TalonID(Talons.SHOOTER_TWO))
     val shooterEncoder = AnalogInput(AnalogSensors.SHOOTER_ENCODER)
     val uptakeMotor = MotorController(TalonID(Talons.HOPPER_UPTAKE))
-    val highSensor = DigitalInput(DigitalSensors.HOPPER_HIGH)
+    val uptakeSensor = DigitalInput(DigitalSensors.HOPPER_HIGH)
 
 
-    var ballLoaded = false
-    var ballReady: Boolean = highSensor.get()
-        get() { prevBallReady = field; field = highSensor.get(); return field }
+    var ballReady: Boolean = uptakeSensor.get()
+        get() { prevBallReady = field; field = uptakeSensor.get(); return field }
     var prevBallReady = ballReady
 
     val rpm: Int
@@ -35,12 +34,10 @@ object Shooter : Subsystem("Shooter") {
 
     override suspend fun default() {
         periodic {
-            if (ballLoaded) {
-                if (!ballReady && prevBallReady) {
-                    uptakeMotor.setPercentOutput(0.1)
-                } else if (ballReady && !prevBallReady) {
-                    uptakeMotor.setPercentOutput(0.0)
-                }
+            if (!ballReady && prevBallReady) {
+                uptakeMotor.setPercentOutput(0.1)
+            } else if (ballReady && !prevBallReady) {
+                uptakeMotor.setPercentOutput(0.0)
             }
         }
     }

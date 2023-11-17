@@ -3,6 +3,7 @@ package org.team2471.off2023
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.team2471.bunnybots2023.Drive
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
@@ -25,7 +26,12 @@ object Limelight : Subsystem("Limelight") {
     var lastJoystickTarget: Angle = 0.0.degrees
     var joystickTarget : Angle? = null
 
-    var currentTarget : BucketTarget? = null
+    // field centric
+    val limelightAngle : Angle
+        get() = Turret.turretAngle + Drive.heading
+
+
+
     init {
 
         GlobalScope.launch(MeanlibDispatcher) {
@@ -39,43 +45,52 @@ object Limelight : Subsystem("Limelight") {
                     }
                 }
 
+                // handle joystick input
                 if (joystickTarget != null) {
                     lastJoystickTarget = joystickTarget as Angle
 
-                    Turret.turretSetpoint = lastJoystickTarget
+                    val upperAimingBound : Angle = lastJoystickTarget + 20.0.degrees
+                    val lowerAimingBound : Angle = lastJoystickTarget - 20.0.degrees
 
-                } else {
-                    if (currentTarget == null) {
-                        val upperAimingBound = lastJoystickTarget.asDegrees + 20.0
-                        val lowerAimingBound = lastJoystickTarget.asDegrees - 20.0
+                    val target : BucketTarget? = getBucketInBounds(upperAimingBound, lowerAimingBound)
 
-                        var foundTarget : BucketTarget? = null
-                        for (target in filteredTargets.indices) {
-                            val angleToBucket = getAngleToBucket(filteredTargets.get(target)).unWrap(lastJoystickTarget).asDegrees
-                            if (lowerAimingBound < angleToBucket &&
-                                angleToBucket < upperAimingBound) {
-                                foundTarget = filteredTargets[target]
-                                break
-                            }
-                        }
+                    if (target != null) {
+                        Turret.aimAtBucket(target)
                     } else {
-
+                        Turret.turretSetpoint = lastJoystickTarget
                     }
 
-
-
+                } else {
+                    if (!filteredTargets.isEmpty()) {
+                        Turret.aimAtBucket(filteredTargets[0])
+                    }
                 }
 
             }
         }
     }
 
+    // returns field-centric angle to bucket
     fun getAngleToBucket(bucket: BucketTarget) : Angle {
-        return Turret.turretAngle + Angle.atan(bucket.x * (29.8).degrees.tan())
+        return limelightAngle + Angle.atan(bucket.x * (29.8).degrees.tan())
     }
 
     val validTargets: Boolean
         get() = validTargetsEntry.getDouble(0.0) == 1.0
+
+    // gets a bucket in field-centric bounds
+    fun getBucketInBounds(upperBound: Angle, lowerBound: Angle) : BucketTarget? {
+        var foundTarget : BucketTarget? = null
+        for (target in filteredTargets.indices) {
+            val angleToBucket : Angle = getAngleToBucket(filteredTargets[target]).unWrap((upperBound + lowerBound)/2.0)
+            if (lowerBound < angleToBucket &&
+                angleToBucket < upperBound) {
+                foundTarget = filteredTargets[target]
+                break
+            }
+        }
+        return foundTarget
+    }
 
     fun identifyBuckets(): List<BucketTarget> {
 
