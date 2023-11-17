@@ -6,6 +6,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.AnalogSensors
 import org.team2471.bunnybots2023.Falcons
+import org.team2471.bunnybots2023.OI
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
@@ -58,21 +59,12 @@ object Turret : Subsystem("Turret") {
             periodic {
                 turretAngleEntry.setDouble(turretAngle.asDegrees)
                 turretCurrentEntry.setDouble(turningMotor.current)
-
-                if (OI.driveA) {
-                    aimAtBucket(Limelight.filteredTargets)
-                }
             }
         }
     }
 
-    fun aimAtBucket(targets: List<BucketTarget>?){
-//        println("heieoo")
-        if (targets != null) {
-            if (targets!!.isEmpty()) return
-//            println("not null")
-            turretSetpoint = Turret.turretAngle + Angle.atan(targets[0].x * (29.8).degrees.tan())
-        }
+    fun aimAtBucket(target : BucketTarget){
+        turretSetpoint = Limelight.getAngleToBucket(target)
     }
 
 }
