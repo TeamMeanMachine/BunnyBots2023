@@ -1,11 +1,8 @@
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.PneumaticsModuleType
 import edu.wpi.first.wpilibj.Solenoid
-import org.team2471.bunnybots2023.DigitalSensors
-import org.team2471.bunnybots2023.Solenoids
-import org.team2471.bunnybots2023.Talons
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.TalonID
 import org.team2471.frc.lib.coroutines.periodic

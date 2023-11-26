@@ -1,9 +1,8 @@
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.team2471.bunnybots2023.Drive
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
@@ -15,16 +14,16 @@ object Limelight : Subsystem("Limelight") {
     private val target0XEntry = table.getEntry("Turret Current")
     private val validTargetsEntry = table.getEntry("tv")
 
+
     private const val lengthHeightMinRatio = 3.5
     const val limelightHeight = 16 // inches
     const val limelightScreenWidth = 320
     const val limelightScreenHeight = 320
+    const val minJoystickDistance = 0.1
 
-    var currentTargets  : List<BucketTarget> = arrayListOf<BucketTarget>()
-    var filteredTargets : List<BucketTarget> = arrayListOf<BucketTarget>()
+    var enemyBuckets : List<BucketTarget> = arrayListOf<BucketTarget>()
 
     var lastJoystickTarget: Angle = 0.0.degrees
-    var joystickTarget : Angle? = null
 
     // field centric
     val limelightAngle : Angle
@@ -37,34 +36,16 @@ object Limelight : Subsystem("Limelight") {
         GlobalScope.launch(MeanlibDispatcher) {
 
             periodic {
-                currentTargets = identifyBuckets()
-                filteredTargets = currentTargets
-                if (filteredTargets.isEmpty()) {
-                    filteredTargets?.filter {
-                        it.isRed == FieldManager.isBlueAlliance
+                enemyBuckets = identifyBuckets()
+                if (enemyBuckets.isNotEmpty()) {
+//                    for (i in filteredTargets!!) {
+//                        println("ID: ${i.id}, IsRed: ${i.isRed} IsValid: ${i.isRed == FieldManager.isBlueAlliance}")
+//                    }
+                    enemyBuckets = enemyBuckets.filter {
+                        it.isRed == AutoChooser.redSide
                     }
                 }
 
-                // handle joystick input
-                if (joystickTarget != null) {
-                    lastJoystickTarget = joystickTarget as Angle
-
-                    val upperAimingBound : Angle = lastJoystickTarget + 20.0.degrees
-                    val lowerAimingBound : Angle = lastJoystickTarget - 20.0.degrees
-
-                    val target : BucketTarget? = getBucketInBounds(upperAimingBound, lowerAimingBound)
-
-                    if (target != null) {
-                        Turret.aimAtBucket(target)
-                    } else {
-                        Turret.turretSetpoint = lastJoystickTarget
-                    }
-
-                } else {
-                    if (!filteredTargets.isEmpty()) {
-                        Turret.aimAtBucket(filteredTargets[0])
-                    }
-                }
 
             }
         }
@@ -81,11 +62,11 @@ object Limelight : Subsystem("Limelight") {
     // gets a bucket in field-centric bounds
     fun getBucketInBounds(upperBound: Angle, lowerBound: Angle) : BucketTarget? {
         var foundTarget : BucketTarget? = null
-        for (target in filteredTargets.indices) {
-            val angleToBucket : Angle = getAngleToBucket(filteredTargets[target]).unWrap((upperBound + lowerBound)/2.0)
+        for (target in enemyBuckets.indices) {
+            val angleToBucket : Angle = getAngleToBucket(enemyBuckets[target]).unWrap((upperBound + lowerBound)/2.0)
             if (lowerBound < angleToBucket &&
                 angleToBucket < upperBound) {
-                foundTarget = filteredTargets[target]
+                foundTarget = enemyBuckets[target]
                 break
             }
         }

@@ -1,24 +1,12 @@
 package org.team2471.bunnybots2023
 
-import edu.wpi.first.wpilibj.DriverStation
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.jetbrains.kotlin.gradle.utils.`is`
-import org.team2471.frc.lib.coroutines.MeanlibDispatcher
-import org.team2471.frc.lib.coroutines.delay
-import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.input.*
 import org.team2471.frc.lib.math.Vector2
 import org.team2471.frc.lib.math.cube
 import org.team2471.frc.lib.math.deadband
 import org.team2471.frc.lib.math.squareWithSign
-import org.team2471.frc.lib.motion.following.demoMode
 import org.team2471.frc.lib.motion.following.xPose
-import org.team2471.frc.lib.units.degrees
-import org.team2471.frc.lib.units.radians
-import org.team2471.off2023.Limelight
-import kotlin.math.atan2
 
 object OI : Subsystem("OI") {
     val driverController = XboxController(0)
@@ -70,16 +58,5 @@ object OI : Subsystem("OI") {
         }
         driverController::x.whenTrue { Drive.xPose() }
 
-
-        GlobalScope.launch ( MeanlibDispatcher ) {
-            periodic {
-                if (operatorRightY * operatorRightY + operatorRightX * operatorRightX > 0.1) {
-                    Limelight.joystickTarget = atan2(operatorRightY, operatorRightX).radians
-                } else {
-                    Limelight.joystickTarget = null
-                }
-
-            }
-        }
     }
 }

@@ -1,12 +1,8 @@
-package org.team2471.off2023
+package org.team2471.bunnybots2023
 
 import edu.wpi.first.networktables.NetworkTableInstance
-import edu.wpi.first.wpilibj.AnalogInput
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.team2471.bunnybots2023.AnalogSensors
-import org.team2471.bunnybots2023.Falcons
-import org.team2471.bunnybots2023.OI
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
@@ -14,6 +10,8 @@ import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.degrees
+import org.team2471.frc.lib.units.radians
+import kotlin.math.atan2
 
 object Turret : Subsystem("Turret") {
 
@@ -22,7 +20,7 @@ object Turret : Subsystem("Turret") {
     val turretAngleEntry = table.getEntry("Turret Angle")
 
 
-    val turningMotor = MotorController(FalconID(Falcons.TURRET))
+    val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
 
     val turretGearRatio: Double = 50.0/11.0
 
@@ -59,6 +57,34 @@ object Turret : Subsystem("Turret") {
             periodic {
                 turretAngleEntry.setDouble(turretAngle.asDegrees)
                 turretCurrentEntry.setDouble(turningMotor.current)
+
+                // sets joystickTarget to the current angle of the right joystick, null if at center
+                val joystickTarget : Angle? = if (OI.driverController.rightThumbstick.length > Limelight.minJoystickDistance) {
+                    -atan2(OI.operatorRightY, OI.operatorRightX).radians
+                } else {
+                    null
+                }
+
+                // handle joystick input
+                if (joystickTarget != null) {
+
+                    val upperAimingBound : Angle = joystickTarget + 20.0.degrees
+                    val lowerAimingBound : Angle = joystickTarget - 20.0.degrees
+
+                    val target : BucketTarget? = Limelight.getBucketInBounds(upperAimingBound, lowerAimingBound)
+
+                    if (target != null) {
+                        aimAtBucket(target)
+                    } else {
+                        turretSetpoint = joystickTarget
+                    }
+
+                } else {
+                    if (Limelight.enemyBuckets.isNotEmpty()) {
+                        aimAtBucket(Limelight.enemyBuckets[0])
+                    }
+                }
+
             }
         }
     }
