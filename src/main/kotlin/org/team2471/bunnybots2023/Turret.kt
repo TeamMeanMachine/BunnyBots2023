@@ -24,12 +24,24 @@ object Turret : Subsystem("Turret") {
 
     val turretGearRatio: Double = 50.0/11.0
 
+    val deadzoneAngle : Angle = -130.0.degrees
+    val deadzoneWidth : Angle = 10.0.degrees
+
     val turretAngle: Angle
         get() = turningMotor.position.degrees
 
     var turretSetpoint: Angle = 0.0.degrees
         set(value) {
-            val angle = value.asDegrees.coerceIn(-178.0, 178.0).degrees
+            val upperDeadzone : Angle = deadzoneAngle + deadzoneWidth/2.0
+            val lowerDeadzone : Angle = deadzoneAngle - deadzoneWidth/2.0
+            // coerce angle out of deadzone
+            var angle = value.unWrap(deadzoneAngle)
+            if (angle < upperDeadzone && angle >= deadzoneAngle) {
+                angle = upperDeadzone
+            } else if (angle > lowerDeadzone && angle <= deadzoneAngle) {
+                angle = lowerDeadzone
+            }
+            angle = angle.wrap()
             turningMotor.setPositionSetpoint(angle.asDegrees)
             field = angle
         }
