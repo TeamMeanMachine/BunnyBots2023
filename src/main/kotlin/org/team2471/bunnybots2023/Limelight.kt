@@ -10,9 +10,10 @@ import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.degrees
 
 object Limelight : Subsystem("Limelight") {
-    private val table = NetworkTableInstance.getDefault().getTable("limelight-front")
+    private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
+    private val table = NetworkTableInstance.getDefault().getTable("Limg")
     private val target0XEntry = table.getEntry("Turret Current")
-    private val validTargetsEntry = table.getEntry("tv")
+    private val validTargetsEntry = datatable.getEntry("tv")
 
 
     private const val lengthHeightMinRatio = 3.5
@@ -56,6 +57,14 @@ object Limelight : Subsystem("Limelight") {
         return limelightAngle + Angle.atan(bucket.x * (29.8).degrees.tan())
     }
 
+    fun Angle.toFieldCentric() : Angle {
+        return this - Drive.heading
+    }
+
+    fun Angle.toRobotCentric() : Angle {
+        return this + Drive.heading
+    }
+
     val validTargets: Boolean
         get() = validTargetsEntry.getDouble(0.0) == 1.0
 
@@ -78,7 +87,7 @@ object Limelight : Subsystem("Limelight") {
         // find all long strips
         var longStrips = arrayListOf<Int>()
         for (entryNum in 0..7) {
-            if (table.getEntry("thor${entryNum}").getDouble(0.0) / table.getEntry("tvert${entryNum}").getDouble(0.0) >= lengthHeightMinRatio) {
+            if (datatable.getEntry("thor${entryNum}").getDouble(0.0) / datatable.getEntry("tvert${entryNum}").getDouble(0.0) >= lengthHeightMinRatio) {
                 longStrips.add(entryNum)
             }
         }
@@ -87,16 +96,16 @@ object Limelight : Subsystem("Limelight") {
         var longStripsColor = IntArray(longStrips.size) {0}
         for (entryNum in 0 .. 7) {
             if (longStrips.contains(entryNum)) continue
-            if (table.getEntry("ta${entryNum}").getDouble(0.0) == 0.0) continue
+            if (datatable.getEntry("ta${entryNum}").getDouble(0.0) == 0.0) continue
 
-            val shortStripX = table.getEntry("tx${entryNum}").getDouble(0.0)
-            val shortStripY = table.getEntry("ty${entryNum}").getDouble(0.0)
+            val shortStripX = datatable.getEntry("tx${entryNum}").getDouble(0.0)
+            val shortStripY = datatable.getEntry("ty${entryNum}").getDouble(0.0)
 
             for (i in 0 until longStrips.size) {
                 val target = longStrips[i]
-                val longStripX = table.getEntry("tx${target}").getDouble(0.0)
-                val longStripHorizontal = table.getEntry("thor${target}").getDouble(0.0) / (0.5 * limelightScreenWidth)
-                val longStripY = table.getEntry("ty${target}").getDouble(0.0)
+                val longStripX = datatable.getEntry("tx${target}").getDouble(0.0)
+                val longStripHorizontal = datatable.getEntry("thor${target}").getDouble(0.0) / (0.5 * limelightScreenWidth)
+                val longStripY = datatable.getEntry("ty${target}").getDouble(0.0)
                 if (shortStripX < longStripX + longStripHorizontal/2 &&
                     shortStripX > longStripX - longStripHorizontal/2) {
                     if (shortStripY > longStripY) {
@@ -117,8 +126,8 @@ object Limelight : Subsystem("Limelight") {
             targets.add(BucketTarget(
                 longStrips[i],
                 longStripsColor[i] > 0,
-                table.getEntry("tx${longStrips[i]}").getDouble(0.0),
-                table.getEntry("ty${longStrips[i]}").getDouble(0.0)
+                datatable.getEntry("tx${longStrips[i]}").getDouble(0.0),
+                datatable.getEntry("ty${longStrips[i]}").getDouble(0.0)
             ))
         }
 
@@ -130,7 +139,7 @@ object Limelight : Subsystem("Limelight") {
     fun targetNum(): Int {
         var amount: Int = 0
         for (entryNum in 0..7) {
-            if (table.getEntry("ta${entryNum}").getDouble(0.0) != 0.0) {
+            if (datatable.getEntry("ta${entryNum}").getDouble(0.0) != 0.0) {
                 println("found tag ta${entryNum}")
                 amount += 1
             }

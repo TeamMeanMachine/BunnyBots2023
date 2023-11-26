@@ -3,6 +3,8 @@ package org.team2471.bunnybots2023
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.team2471.bunnybots2023.Limelight.toFieldCentric
+import org.team2471.bunnybots2023.Limelight.toRobotCentric
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
@@ -18,22 +20,26 @@ object Turret : Subsystem("Turret") {
     private val table = NetworkTableInstance.getDefault().getTable("Turret")
     val turretCurrentEntry = table.getEntry("Turret Current")
     val turretAngleEntry = table.getEntry("Turret Angle")
+    val turretSetpointEntry = table.getEntry("Turret Setpoint")
 
 
     val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
 
     val turretGearRatio: Double = 50.0/11.0
 
+    // robot centric
     val deadzoneAngle : Angle = -130.0.degrees
     val deadzoneWidth : Angle = 10.0.degrees
 
+    // in robot centric
     val turretAngle: Angle
         get() = turningMotor.position.degrees
 
+    // in field centric
     var turretSetpoint: Angle = 0.0.degrees
         set(value) {
-            val upperDeadzone : Angle = deadzoneAngle + deadzoneWidth/2.0
-            val lowerDeadzone : Angle = deadzoneAngle - deadzoneWidth/2.0
+            val upperDeadzone : Angle = (deadzoneAngle + deadzoneWidth/2.0).toFieldCentric()
+            val lowerDeadzone : Angle = (deadzoneAngle - deadzoneWidth/2.0).toFieldCentric()
             // coerce angle out of deadzone
             var angle = value.unWrap(deadzoneAngle)
             if (angle < upperDeadzone && angle >= deadzoneAngle) {
@@ -42,7 +48,7 @@ object Turret : Subsystem("Turret") {
                 angle = lowerDeadzone
             }
             angle = angle.wrap()
-            turningMotor.setPositionSetpoint(angle.asDegrees)
+            turningMotor.setPositionSetpoint(angle.toRobotCentric().asDegrees)
             field = angle
         }
 
@@ -69,6 +75,7 @@ object Turret : Subsystem("Turret") {
             periodic {
                 turretAngleEntry.setDouble(turretAngle.asDegrees)
                 turretCurrentEntry.setDouble(turningMotor.current)
+                turretSetpointEntry.setDouble(turretSetpoint.asDegrees)
 
                 // sets joystickTarget to the current angle of the right joystick, null if at center
                 val joystickTarget : Angle? = if (OI.driverController.rightThumbstick.length > Limelight.minJoystickDistance) {
