@@ -52,8 +52,6 @@ object Turret : Subsystem("Turret") {
             field = angle
         }
 
-    var spinning = false
-
     init {
         turningMotor.restoreFactoryDefaults()
         turningMotor.config(20) {
