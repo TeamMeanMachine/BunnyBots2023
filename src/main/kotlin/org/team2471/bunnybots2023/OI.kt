@@ -68,9 +68,9 @@ object OI : Subsystem("OI") {
         GlobalScope.launch ( MeanlibDispatcher ) {
             periodic {
                 if (operatorRightY * operatorRightY + operatorRightX * operatorRightX > 0.1) {
-                    Limelight.joystickTarget = atan2(operatorRightY, operatorRightX).radians
+//                    Limelight.joystickTarget = atan2(operatorRightY, operatorRightX).radians
                 } else {
-                    Limelight.joystickTarget = null
+//                    Limelight.joystickTarget = null
                 }
 
             }
