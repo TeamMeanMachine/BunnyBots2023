@@ -1,5 +1,9 @@
 package org.team2471.bunnybots2023
 
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import org.team2471.frc.lib.coroutines.MeanlibDispatcher
+import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.input.*
 import org.team2471.frc.lib.math.Vector2
@@ -7,6 +11,8 @@ import org.team2471.frc.lib.math.cube
 import org.team2471.frc.lib.math.deadband
 import org.team2471.frc.lib.math.squareWithSign
 import org.team2471.frc.lib.motion.following.xPose
+import org.team2471.frc.lib.units.radians
+import kotlin.math.atan2
 
 object OI : Subsystem("OI") {
     val driverController = XboxController(0)
@@ -57,6 +63,20 @@ object OI : Subsystem("OI") {
             Drive.initializeSteeringMotors()
         }
         driverController::x.whenTrue { Drive.xPose() }
+        driverController::rightBumper.whenTrue { Intake.toggleIntake() }
+
+        GlobalScope.launch ( MeanlibDispatcher ) {
+            periodic {
+                if (operatorRightY * operatorRightY + operatorRightX * operatorRightX > 0.1) {
+                    Limelight.joystickTarget = atan2(operatorRightY, operatorRightX).radians
+                } else {
+                    Limelight.joystickTarget = null
+                }
+
+            }
+        }
+        operatorController::y.whenTrue { Intake.intakeUp()}
+        operatorController::a.whenTrue { Intake.intakeDown()}
 
     }
 }

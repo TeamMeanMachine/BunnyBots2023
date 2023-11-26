@@ -4,8 +4,7 @@ package org.team2471.bunnybots2023
 
 object Talons {
     const val INTAKE_FRONT = 99
-    const val INTAKE_LEFT = 99
-    const val INTAKE_RIGHT = 99
+    const val INTAKE_CENTER = 99
     const val HOPPER_UPTAKE = 99
     const val HOPPER_CONVEYOR = 99
     const val SHOOTER_ONE = 99
