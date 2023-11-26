@@ -27,7 +27,7 @@ import kotlin.math.min
 
 @OptIn(DelicateCoroutinesApi::class)
 object Drive : Subsystem("Drive"), SwerveDrive {
-    val robotHalfWidth = (32.0/2.0).inches //<- THIS VALUE IS WRONG!!!
+    val robotHalfWidth = (30.0/2.0).inches
     val table = NetworkTableInstance.getDefault().getTable(name)
     val navXGyroEntry = table.getEntry("NavX Gyro")
 
@@ -35,6 +35,15 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     val odometer1Entry = table.getEntry("Odometer 1")
     val odometer2Entry = table.getEntry("Odometer 2")
     val odometer3Entry = table.getEntry("Odometer 3")
+
+    val absoluteAngle0Entry = table.getEntry("Analog Angle 0")
+    val absoluteAngle1Entry = table.getEntry("Analog Angle 1")
+    val absoluteAngle2Entry = table.getEntry("Analog Angle 2")
+    val absoluteAngle3Entry = table.getEntry("Analog Angle 3")
+    val motorAngle0Entry = table.getEntry("Motor Angle 0")
+    val motorAngle1Entry = table.getEntry("Motor Angle 1")
+    val motorAngle2Entry = table.getEntry("Motor Angle 2")
+    val motorAngle3Entry = table.getEntry("Motor Angle 3")
 
     val useGyroEntry = table.getEntry("Use Gyro")
 
@@ -106,8 +115,6 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     override var robotPivot = Vector2(0.0, 0.0)
     override var headingSetpoint = 0.0.degrees
 
-    var angleToNode: Angle = 0.0.degrees
-
     override val parameters: SwerveParameters = SwerveParameters(
         gyroRateCorrection = 0.0,
         kpPosition = 0.32,
@@ -137,7 +144,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
     init {
         println("drive init")
-        initializeSteeringMotors()
+        //initializeSteeringMotors()
 
         GlobalScope.launch(MeanlibDispatcher) {
             println("in drive global scope")
@@ -166,6 +173,16 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 xEntry.setDouble(x)
                 yEntry.setDouble(y)
                 headingEntry.setDouble(heading.asDegrees)
+
+                motorAngle0Entry.setDouble((modules[0] as Module).angle.wrap().asDegrees)
+                motorAngle1Entry.setDouble((modules[1] as Module).angle.wrap().asDegrees)
+                motorAngle2Entry.setDouble((modules[2] as Module).angle.wrap().asDegrees)
+                motorAngle3Entry.setDouble((modules[3] as Module).angle.wrap().asDegrees)
+
+                absoluteAngle0Entry.setDouble((modules[0] as Module).absoluteAngle.asDegrees)
+                absoluteAngle1Entry.setDouble((modules[1] as Module).absoluteAngle.asDegrees)
+                absoluteAngle2Entry.setDouble((modules[2] as Module).absoluteAngle.asDegrees)
+                absoluteAngle3Entry.setDouble((modules[3] as Module).absoluteAngle.asDegrees)
             }
         }
     }
@@ -270,13 +287,13 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         }
 
         override val angle: Angle
-            get() = turnMotor.position.degrees
+            get() = -turnMotor.position.degrees
 
         val digitalEncoder : DutyCycleEncoder = DutyCycleEncoder(digitalInputID)
 
         val absoluteAngle: Angle
             get() {
-                return (-digitalEncoder.absolutePosition.degrees * 360.0 - angleOffset).wrap()
+                return (digitalEncoder.absolutePosition.degrees * 360.0 - angleOffset).wrap()
             }
 
         override val treadWear: Double
@@ -292,7 +309,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
         val power: Double
             get() {
-                return driveMotor.output
+                return -driveMotor.output
             }
 
         override val currDistance: Double
@@ -309,7 +326,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         }
 
         override var angleSetpoint: Angle = 0.0.degrees
-            set(value) = turnMotor.setPositionSetpoint((angle + (value - angle).wrap()).asDegrees)
+            set(value) = turnMotor.setPositionSetpoint(-(angle + (value - angle).wrap()).asDegrees)
 
         override fun setDrivePower(power: Double) {
             driveMotor.setPercentOutput(power)
@@ -320,27 +337,29 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
         init {
             println("Drive.module.init")
-            turnMotor.config(20) {
-                feedbackCoefficient = 360.0 / 2048.0 / 12.0  // 21.451 for bunnybot with same gearing
+            print(angle.asDegrees)
+            turnMotor.config {
+                feedbackCoefficient = (360.0 / 42.0 / 12.0 / 5.08) * (360.5 / 274.04)
                 inverted(false)
                 setSensorPhase(false)
                 coastMode()
-                setRawOffsetConfig(absoluteAngle.asDegrees)
+                println("Raw offset: ${absoluteAngle.asDegrees}")
+//                setRawOffsetConfig(absoluteAngle.asDegrees)
                 pid {
-                    p(0.000002)
+                    p(0.0002)
 //                    d(0.0000025)
                 }
             }
             driveMotor.config {
                 brakeMode()
                 //                    wheel diam / 12 in per foot * pi / ticks / gear ratio
-                feedbackCoefficient = 4.0 / 12.0 * Math.PI / 2048.0 / 5.42 * (90.8/96.0)
+                feedbackCoefficient = 3.0 / 12.0 * Math.PI / 42.0 / 4.71
                 currentLimit(70, 75, 1)
                 openLoopRamp(0.2)
             }
             GlobalScope.launch {
                 periodic {
-                    println("${turnMotor.motorID}   ${ round(absoluteAngle.asDegrees, 2) }")
+//                    println("${turnMotor.motorID}   ${ round(absoluteAngle.asDegrees, 2) }")
                 }
             }
         }
@@ -356,9 +375,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         }
 
         fun setAngleOffset() {
-            val digitalAngle = -digitalEncoder.absolutePosition
-            Preferences.setDouble("Angle Offset $index", digitalAngle)
+            val digitalAngle = digitalEncoder.absolutePosition
             angleOffset = digitalAngle.degrees * 360.0
+            Preferences.setDouble("Angle Offset $index", angleOffset.asDegrees)
             println("Angle Offset $index = $digitalAngle")
         }
     }

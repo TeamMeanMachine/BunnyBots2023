@@ -25,7 +25,7 @@ object Turret : Subsystem("Turret") {
 
     val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
 
-    val turretGearRatio: Double = 50.0/11.0
+    val turretGearRatio: Double = 20.0/1.0
 
     // robot centric
     val deadzoneAngle : Angle = -130.0.degrees
@@ -38,6 +38,7 @@ object Turret : Subsystem("Turret") {
     // in field centric
     var turretSetpoint: Angle = 0.0.degrees
         set(value) {
+            println("HI!!!")
             val upperDeadzone : Angle = (deadzoneAngle + deadzoneWidth/2.0).toFieldCentric()
             val lowerDeadzone : Angle = (deadzoneAngle - deadzoneWidth/2.0).toFieldCentric()
             // coerce angle out of deadzone
@@ -53,6 +54,7 @@ object Turret : Subsystem("Turret") {
         }
 
     init {
+//        println("*******************************************************************************************************")
         turningMotor.restoreFactoryDefaults()
         turningMotor.config(20) {
             //                          ticks / gear ratio
@@ -81,6 +83,7 @@ object Turret : Subsystem("Turret") {
                 } else {
                     null
                 }
+                println(joystickTarget)
 
                 // handle joystick input
                 if (joystickTarget != null) {

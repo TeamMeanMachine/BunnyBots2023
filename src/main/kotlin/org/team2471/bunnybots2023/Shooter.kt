@@ -9,9 +9,8 @@ import org.team2471.frc.lib.framework.Subsystem
 
 
 object Shooter : Subsystem("Shooter") {
-    val shooterMotorOne = MotorController(TalonID(Talons.SHOOTER_ONE))
-    val shooterMotorTwo = MotorController(TalonID(Talons.SHOOTER_TWO))
-    val shooterEncoder = AnalogInput(AnalogSensors.SHOOTER_ENCODER)
+    val shooterMotorOne = MotorController(TalonID(Talons.SHOOTER_ONE), TalonID(Talons.SHOOTER_TWO))
+//    val shooterEncoder = AnalogInput(AnalogSensors.SHOOTER_ENCODER)
     val uptakeMotor = MotorController(TalonID(Talons.HOPPER_UPTAKE))
     val uptakeSensor = DigitalInput(DigitalSensors.HOPPER_HIGH)
 

@@ -52,10 +52,10 @@ object OI : Subsystem("OI") {
         get() = operatorController.rightTrigger
 
     val operatorRightX: Double
-        get() = operatorController.rightThumbstickX.deadband(0.25)
+        get() = operatorController.rightThumbstickX.deadband(0.0)
 
     val operatorRightY: Double
-        get() = operatorController.rightThumbstickY.deadband(0.25)
+        get() = operatorController.rightThumbstickY.deadband(0.0)
 
     init {
         driverController::back.whenTrue {
@@ -65,16 +65,6 @@ object OI : Subsystem("OI") {
         driverController::x.whenTrue { Drive.xPose() }
         driverController::rightBumper.whenTrue { Intake.toggleIntake() }
 
-        GlobalScope.launch ( MeanlibDispatcher ) {
-            periodic {
-                if (operatorRightY * operatorRightY + operatorRightX * operatorRightX > 0.1) {
-//                    Limelight.joystickTarget = atan2(operatorRightY, operatorRightX).radians
-                } else {
-//                    Limelight.joystickTarget = null
-                }
-
-            }
-        }
         operatorController::y.whenTrue { Intake.intakeUp()}
         operatorController::a.whenTrue { Intake.intakeDown()}
 

@@ -46,6 +46,14 @@ object Robot : MeanlibRobot() {
         OI
         Drive
         println("Activating Drive!")
+        Turret
+        println("Activating Turret! ${Turret.turretSetpoint}")
+        Limelight
+        println("Activating Limelight! ${Limelight.limelightAngle}")
+//        Intake
+//        println("Activating Intake!")
+        Shooter
+        println("Activating Shooter!")
         Drive.zeroGyro()
         Drive.heading = 0.0.degrees
 
@@ -56,6 +64,8 @@ object Robot : MeanlibRobot() {
     override suspend fun enable() {
         println("starting enable")
         Drive.enable()
+        Turret.enable()
+
         println("field centric? ${SmartDashboard.getBoolean("Use Gyro", true) && !DriverStation.isAutonomous()}")
         println("ending enable")
     }
@@ -82,10 +92,10 @@ object Robot : MeanlibRobot() {
 
     override suspend fun test()  {
         println("test mode begin. Hi.")
-//        Drive.steeringTests()
-//        Drive.driveTests()
+        Drive.steeringTests()
+        Drive.driveTests()
 
-        Drive.setAngleOffsets()
+//        Drive.setAngleOffsets()
     }
 
 
@@ -93,9 +103,6 @@ object Robot : MeanlibRobot() {
         OI.driverController.rumble = 0.0
         OI.operatorController.rumble = 0.0
         Drive.disable()
-        periodic {
-            println()
-        }
     }
 
     private fun initTimeMeasurement(){
