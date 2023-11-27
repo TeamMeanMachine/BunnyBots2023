@@ -1,5 +1,6 @@
 package org.team2471.bunnybots2023
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -23,7 +24,7 @@ object Turret : Subsystem("Turret") {
     val turretSetpointEntry = table.getEntry("Turret Setpoint")
 
 
-    val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
+    val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE))
 
     val turretGearRatio: Double = 20.0/1.0
 
@@ -67,6 +68,8 @@ object Turret : Subsystem("Turret") {
                 d(0.00005)
             }
             currentLimit(0, 20, 0)
+
+            encoderType(FeedbackDevice.IntegratedSensor)
 //            burnSettings()
         }
         turningMotor.setRawOffset(0.0)
@@ -83,7 +86,7 @@ object Turret : Subsystem("Turret") {
                 } else {
                     null
                 }
-                println(joystickTarget)
+                println(turningMotor.motorID)
 
                 // handle joystick input
                 if (joystickTarget != null) {
