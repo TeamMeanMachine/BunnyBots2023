@@ -5,6 +5,18 @@ import org.team2471.frc.lib.framework.use
 
 
 suspend fun fire() = use(Shooter) {
+    println("firing")
     Shooter.uptakeMotor.setPercentOutput(1.0)
+    Shooter.shooterMotorTwo.setPercentOutput(0.4)
+    Shooter.shooterMotorOne.setPercentOutput(0.4)
     delay(0.1)
+}
+suspend fun toggleBallCollection() = use(Shooter, Intake) {
+    if (Shooter.disableUptake) {
+        Shooter.disableUptake = true
+        Intake.disableConveyor = true
+    } else {
+        Shooter.disableUptake = false
+        Intake.disableConveyor = false
+    }
 }

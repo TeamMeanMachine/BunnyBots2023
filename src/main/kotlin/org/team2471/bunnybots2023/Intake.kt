@@ -6,33 +6,45 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType
 import edu.wpi.first.wpilibj.Solenoid
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.team2471.bunnybots2023.DigitalSensors
-import org.team2471.bunnybots2023.Solenoids
-import org.team2471.bunnybots2023.Talons
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.TalonID
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
+import org.team2471.frc.lib.util.Timer
 
 object Intake : Subsystem("Intake") {
     val table = NetworkTableInstance.getDefault().getTable("Intake")
 
     val isDownEntry = table.getEntry("isDown")
+    val frontPowerEntry = table.getEntry("Front Power")
+    val centerPowerEntry = table.getEntry("Center Power")
+    val frontMotorCurrentEntry = table.getEntry("Front Current")
+    val centerMotorCurrentEntry = table.getEntry("Center Current")
+    val intakingEntry = table.getEntry("Intaking")
+    val ballLoadedEntry = table.getEntry("Ball Loaded")
+    val disableConveyorEntry = table.getEntry("Disabled Conveyor")
 
 
     val frontMotor = MotorController(TalonID(Talons.INTAKE_FRONT))
     val centerMotor = MotorController(TalonID(Talons.INTAKE_CENTER))
-    val solenoid = Solenoid(PneumaticsModuleType.CTREPCM, Solenoids.INTAKE)
+    val solenoid = Solenoid(PneumaticsModuleType.REVPH, Solenoids.INTAKE)
     val conveyorMotor = MotorController(TalonID(Talons.HOPPER_CONVEYOR))
-
     val lowSensor = DigitalInput(DigitalSensors.HOPPER_LOW)
 
     var ballLoaded = lowSensor.get()
         get() { prevBallLoaded = field; field = lowSensor.get(); return field }
     var prevBallLoaded = ballLoaded
+
     val intaking: Boolean
         get() = frontMotor.current > 1.0
     val isDown = solenoid.get()
+
+    val frontPower: Double
+        get() = frontPowerEntry.getDouble(1.0).coerceIn(0.0, 1.0)
+    val centerPower: Double
+        get() = centerPowerEntry.getDouble(1.0).coerceIn(0.0, 1.0)
+
+    var disableConveyor = false
 
 
 
@@ -40,48 +52,61 @@ object Intake : Subsystem("Intake") {
     init {
 
         frontMotor.config {
-           currentLimit(0, 40,0)
-            coastMode()
+           currentLimit(30, 40,0)
+           inverted(true)
+//           coastMode()
         }
         centerMotor.config {
-           currentLimit(0, 40,0)
-            coastMode()
+            currentLimit(30, 40, 0)
+//            coastMode()
         }
+        conveyorMotor.config {
+            currentLimit(30, 40, 0)
+            brakeMode()
+        }
+
+        if (!frontPowerEntry.exists()) {
+           frontPowerEntry.setDouble(1.0)
+           frontPowerEntry.setPersistent()
+        }
+        if (!centerPowerEntry.exists()) {
+            centerPowerEntry.setDouble(1.0)
+            centerPowerEntry.setPersistent()
+        }
+
         GlobalScope.launch {
             periodic {
                 isDownEntry.setBoolean(isDown)
+                frontMotorCurrentEntry.setDouble(frontMotor.current)
+                centerMotorCurrentEntry.setDouble(centerMotor.current)
+                intakingEntry.setBoolean(intaking)
+                ballLoadedEntry.setBoolean(ballLoaded)
+                disableConveyorEntry.setBoolean(disableConveyor)
+//                println("low ${lowSensor.get()}")
             }
         }
     }
-    fun toggleIntake() {
-        if (intaking) {
-            frontMotor.setPercentOutput(0.0)
-            centerMotor.setPercentOutput(0.0)
 
-        } else if (isDown) {
-            frontMotor.setPercentOutput(1.0)
-            centerMotor.setPercentOutput(1.0)
-        }
+    fun startIntake() {
+        frontMotor.setPercentOutput(frontPower)
+        centerMotor.setPercentOutput(centerPower)
+        println("Intake starting")
+//        intaking = true
     }
-
-    override fun preEnable() {
+    fun stopIntake() {
         frontMotor.setPercentOutput(0.0)
         centerMotor.setPercentOutput(0.0)
-        conveyorMotor.setPercentOutput(0.0)
+        println("Intake stopping")
+//        intaking = false
     }
-    override suspend fun default() {
-        periodic {
-            if (Shooter.ballReady && ballLoaded) {
-                conveyorMotor.setPercentOutput(0.0)
-            } else {
-                conveyorMotor.setPercentOutput(0.5)
-            }
+
+    fun toggleIntake() {
+        if (intaking) {
+            stopIntake()
+        } else {
+            startIntake()
         }
-
     }
-
-
-
 
     fun intakeDown() {
         solenoid.set(true)
@@ -90,6 +115,27 @@ object Intake : Subsystem("Intake") {
         solenoid.set(false)
     }
 
+    override fun preEnable() {
+        stopIntake()
+        conveyorMotor.setPercentOutput(0.0)
+    }
 
-
+    override suspend fun default() {
+        var reverseBall = false
+        var detectedBall = false
+        periodic(period = 0.001) {
+            if (!disableConveyor) {
+                if (ballLoaded && !prevBallLoaded) {
+                    println("detected a ball!!")
+                    conveyorMotor.setPercentOutput(0.0)
+                    reverseBall = true
+                } else if (!ballLoaded) {
+                    conveyorMotor.setPercentOutput(1.0)
+                    detectedBall = false
+                }
+            } else {
+                conveyorMotor.setPercentOutput(0.0)
+            }
+        }
+    }
 }

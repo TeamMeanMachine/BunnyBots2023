@@ -64,6 +64,9 @@ object OI : Subsystem("OI") {
         }
         driverController::x.whenTrue { Drive.xPose() }
         driverController::rightBumper.whenTrue { Intake.toggleIntake() }
+        driverController::b.whenTrue { toggleBallCollection() }
+
+
 
         operatorController::y.whenTrue { Intake.intakeUp()}
         operatorController::a.whenTrue { Intake.intakeDown()}
