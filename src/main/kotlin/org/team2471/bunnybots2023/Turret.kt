@@ -83,7 +83,6 @@ object Turret : Subsystem("Turret") {
                 } else {
                     null
                 }
-                println(joystickTarget)
 
                 // handle joystick input
                 if (joystickTarget != null) {

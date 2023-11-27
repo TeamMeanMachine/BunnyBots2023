@@ -120,8 +120,8 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         kpPosition = 0.32,
         kdPosition = 0.6,
         kPositionFeedForward = 0.05,
-        kpHeading = 0.008,
-        kdHeading = 0.01,
+        kpHeading = 0.005,
+        kdHeading = 0.02,
         kHeadingFeedForward = 0.001,
         kMoveWhileSpin = 0.0,
     )
@@ -144,8 +144,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
     init {
         println("drive init")
-        //initializeSteeringMotors()
-
+        initializeSteeringMotors()
         GlobalScope.launch(MeanlibDispatcher) {
             println("in drive global scope")
             val headingEntry = table.getEntry("Heading")
@@ -293,7 +292,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
         val absoluteAngle: Angle
             get() {
-                return (digitalEncoder.absolutePosition.degrees * 360.0 - angleOffset).wrap()
+                return (-digitalEncoder.absolutePosition.degrees * 360.0 - angleOffset).wrap()
             }
 
         override val treadWear: Double
@@ -332,6 +331,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             driveMotor.setPercentOutput(power)
         }
 
+
         val error: Angle
             get() = turnMotor.closedLoopError.degrees
 
@@ -343,8 +343,8 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 inverted(false)
                 setSensorPhase(false)
                 coastMode()
-                println("Raw offset: ${absoluteAngle.asDegrees}")
-//                setRawOffsetConfig(absoluteAngle.asDegrees)
+                println("Absolute Angle: ${absoluteAngle.asDegrees}")
+                setRawOffsetConfig(absoluteAngle.asDegrees)
                 pid {
                     p(0.0002)
 //                    d(0.0000025)
@@ -375,7 +375,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         }
 
         fun setAngleOffset() {
-            val digitalAngle = digitalEncoder.absolutePosition
+            val digitalAngle = -digitalEncoder.absolutePosition
             angleOffset = digitalAngle.degrees * 360.0
             Preferences.setDouble("Angle Offset $index", angleOffset.asDegrees)
             println("Angle Offset $index = $digitalAngle")

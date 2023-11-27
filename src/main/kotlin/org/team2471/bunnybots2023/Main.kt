@@ -44,7 +44,6 @@ object Robot : MeanlibRobot() {
         println("NEVER GONNA GIVE YOU UP")
 
         OI
-        Drive
         println("Activating Drive!")
         Turret
         println("Activating Turret! ${Turret.turretSetpoint}")
@@ -54,6 +53,7 @@ object Robot : MeanlibRobot() {
 //        println("Activating Intake!")
         Shooter
         println("Activating Shooter!")
+        Drive
         Drive.zeroGyro()
         Drive.heading = 0.0.degrees
 
@@ -92,10 +92,10 @@ object Robot : MeanlibRobot() {
 
     override suspend fun test()  {
         println("test mode begin. Hi.")
-        Drive.steeringTests()
-        Drive.driveTests()
+//        Drive.steeringTests()
+//        Drive.driveTests()
 
-//        Drive.setAngleOffsets()
+        Drive.setAngleOffsets()
     }
 
 
