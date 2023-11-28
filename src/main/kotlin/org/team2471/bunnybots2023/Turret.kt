@@ -5,7 +5,6 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.toFieldCentric
-import org.team2471.bunnybots2023.Limelight.toRobotCentric
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
@@ -24,7 +23,7 @@ object Turret : Subsystem("Turret") {
     val turretSetpointEntry = table.getEntry("Turret Setpoint")
 
 
-    val turningMotor = MotorController(FalconID(Falcons.TURRET_TWO))
+    val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE))
 
     val turretGearRatio: Double = 60.0/1.0
 
@@ -50,7 +49,7 @@ object Turret : Subsystem("Turret") {
                 angle = lowerDeadzone
             }
             angle = angle.wrap()
-            turningMotor.setPositionSetpoint(angle.toRobotCentric().asDegrees)
+//            turningMotor.setPositionSetpoint(angle.toRobotCentric().asDegrees)
             field = angle
         }
 

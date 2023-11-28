@@ -9,7 +9,7 @@ import org.team2471.frc.lib.framework.use
 suspend fun turretOITest() = use(Turret){
     periodic {
         val power = OI.operatorController.rightThumbstickX / 4.0
-        Turret.turningMotor.setPercentOutput(power)
+        Turret.turningMotor.setPercentOutput(1.0)
         println("power = $power")
     }
 }

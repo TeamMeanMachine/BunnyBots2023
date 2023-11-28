@@ -10,7 +10,6 @@ import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.TalonID
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
-import org.team2471.frc.lib.util.Timer
 
 object Intake : Subsystem("Intake") {
     val table = NetworkTableInstance.getDefault().getTable("Intake")
@@ -91,12 +90,14 @@ object Intake : Subsystem("Intake") {
         frontMotor.setPercentOutput(frontPower)
         centerMotor.setPercentOutput(centerPower)
         println("Intake starting")
+        OI.driverController.rumble = 0.5
 //        intaking = true
     }
     fun stopIntake() {
         frontMotor.setPercentOutput(0.0)
         centerMotor.setPercentOutput(0.0)
         println("Intake stopping")
+        OI.driverController.rumble = 0.0
 //        intaking = false
     }
 
@@ -116,6 +117,10 @@ object Intake : Subsystem("Intake") {
     }
 
     override fun preEnable() {
+        stopIntake()
+        conveyorMotor.setPercentOutput(0.0)
+    }
+    override fun onDisable() {
         stopIntake()
         conveyorMotor.setPercentOutput(0.0)
     }

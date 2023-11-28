@@ -1,6 +1,7 @@
 package org.team2471.bunnybots2023
 
 import org.team2471.frc.lib.coroutines.delay
+import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.use
 
 
@@ -18,5 +19,22 @@ suspend fun toggleBallCollection() = use(Shooter, Intake) {
     } else {
         Shooter.disableUptake = true
         Intake.disableConveyor = true
+    }
+}
+suspend fun holdToSpit() = use(Intake, Shooter) {
+    val prevIntaking = Intake.intaking
+    periodic {
+        if (OI.driverController.leftBumper) {
+            this.stop()
+        }
+        Intake.centerMotor.setPercentOutput(-1.0)
+        Intake.frontMotor.setPercentOutput(-1.0)
+        Intake.conveyorMotor.setPercentOutput(-1.0)
+        Shooter.uptakeMotor.setPercentOutput(-1.0)
+    }
+    if (prevIntaking) {
+        Intake.startIntake()
+    } else {
+        Intake.stopIntake()
     }
 }
