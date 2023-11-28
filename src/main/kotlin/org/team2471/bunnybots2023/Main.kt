@@ -93,6 +93,8 @@ object Robot : MeanlibRobot() {
 
     override suspend fun test()  {
         println("test mode begin. Hi.")
+
+        turretOITest()
 //        Drive.steeringTests()
 //        Drive.driveTests()
 

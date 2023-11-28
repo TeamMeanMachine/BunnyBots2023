@@ -13,10 +13,10 @@ suspend fun fire() = use(Shooter) {
 }
 suspend fun toggleBallCollection() = use(Shooter, Intake) {
     if (Shooter.disableUptake) {
-        Shooter.disableUptake = true
-        Intake.disableConveyor = true
-    } else {
         Shooter.disableUptake = false
         Intake.disableConveyor = false
+    } else {
+        Shooter.disableUptake = true
+        Intake.disableConveyor = true
     }
 }

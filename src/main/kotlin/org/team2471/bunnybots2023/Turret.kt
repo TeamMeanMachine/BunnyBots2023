@@ -1,5 +1,6 @@
 package org.team2471.bunnybots2023
 
+import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -23,9 +24,9 @@ object Turret : Subsystem("Turret") {
     val turretSetpointEntry = table.getEntry("Turret Setpoint")
 
 
-    val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
+    val turningMotor = MotorController(FalconID(Falcons.TURRET_TWO))
 
-    val turretGearRatio: Double = 20.0/1.0
+    val turretGearRatio: Double = 60.0/1.0
 
     // robot centric
     val deadzoneAngle : Angle = -130.0.degrees
@@ -67,9 +68,11 @@ object Turret : Subsystem("Turret") {
                 d(0.00005)
             }
             currentLimit(0, 20, 0)
-//            burnSettings()
+
+            encoderType(FeedbackDevice.IntegratedSensor)
+            burnSettings()
+            setRawOffsetConfig(0.0)
         }
-        turningMotor.setRawOffset(0.0)
 
         GlobalScope.launch(MeanlibDispatcher) {
             periodic {
@@ -102,9 +105,9 @@ object Turret : Subsystem("Turret") {
                 val target : BucketTarget? = Limelight.getBucketInBounds(upperAimingBound, lowerAimingBound)
 
                 if (target != null) {
-                    aimAtBucket(target)
+                    //aimAtBucket(target)
                 } else {
-                    turretSetpoint = joystickTarget
+                   // turretSetpoint = joystickTarget
                 }
 
             } else {
