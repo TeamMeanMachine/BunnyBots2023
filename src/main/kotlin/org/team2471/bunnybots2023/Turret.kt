@@ -77,33 +77,40 @@ object Turret : Subsystem("Turret") {
                 turretCurrentEntry.setDouble(turningMotor.current)
                 turretSetpointEntry.setDouble(turretSetpoint.asDegrees)
 
-                // sets joystickTarget to the current angle of the right joystick, null if at center
-                val joystickTarget : Angle? = if (OI.driverController.rightThumbstick.length > Limelight.minJoystickDistance) {
-                    -atan2(OI.operatorRightY, OI.operatorRightX).radians
+
+
+            }
+        }
+    }
+
+    override suspend fun default() {
+
+        periodic {
+            // sets joystickTarget to the current angle of the right joystick, null if at center
+            val joystickTarget : Angle? = if (OI.driverController.rightThumbstick.length > Limelight.minJoystickDistance) {
+                -atan2(OI.operatorRightY, OI.operatorRightX).radians
+            } else {
+                null
+            }
+
+            // handle joystick input
+            if (joystickTarget != null) {
+
+                val upperAimingBound : Angle = joystickTarget + 20.0.degrees
+                val lowerAimingBound : Angle = joystickTarget - 20.0.degrees
+
+                val target : BucketTarget? = Limelight.getBucketInBounds(upperAimingBound, lowerAimingBound)
+
+                if (target != null) {
+                    aimAtBucket(target)
                 } else {
-                    null
+                    turretSetpoint = joystickTarget
                 }
 
-                // handle joystick input
-                if (joystickTarget != null) {
-
-                    val upperAimingBound : Angle = joystickTarget + 20.0.degrees
-                    val lowerAimingBound : Angle = joystickTarget - 20.0.degrees
-
-                    val target : BucketTarget? = Limelight.getBucketInBounds(upperAimingBound, lowerAimingBound)
-
-                    if (target != null) {
-                        aimAtBucket(target)
-                    } else {
-                        turretSetpoint = joystickTarget
-                    }
-
-                } else {
-                    if (Limelight.enemyBuckets.isNotEmpty()) {
-                        aimAtBucket(Limelight.enemyBuckets[0])
-                    }
+            } else {
+                if (Limelight.enemyBuckets.isNotEmpty()) {
+                    aimAtBucket(Limelight.enemyBuckets[0])
                 }
-
             }
         }
     }
