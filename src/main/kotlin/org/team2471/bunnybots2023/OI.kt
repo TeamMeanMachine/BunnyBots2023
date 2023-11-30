@@ -64,8 +64,8 @@ object OI : Subsystem("OI") {
 
 
         operatorController::rightTriggerFullPress.whenTrue { fire() }
-        operatorController::y.whenTrue { Intake.intakeUp()}
-        operatorController::a.whenTrue { Intake.intakeDown()}
+//        operatorController::y.whenTrue { Intake.intakeUp()}
+//        operatorController::a.whenTrue { Intake.intakeDown()}
 
     }
 }
