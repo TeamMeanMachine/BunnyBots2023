@@ -5,7 +5,6 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.toFieldCentric
-import org.team2471.bunnybots2023.OI.opX
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
@@ -116,12 +115,12 @@ object Turret : Subsystem("Turret") {
                 }
             }
 
-            if (opX) {
-                println("whhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
-                turretGO()
-            } else {
-                turretStop()
-            }
+//            if (opX) {
+//                println("whhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+//                turretGO()
+//            } else {
+//                turretStop()
+//            }
         }
     }
 

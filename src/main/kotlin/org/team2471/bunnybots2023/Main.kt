@@ -4,6 +4,7 @@ package org.team2471.bunnybots2023
 
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.RobotBase
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.DelicateCoroutinesApi
 import org.team2471.frc.lib.coroutines.periodic
@@ -59,6 +60,13 @@ object Robot : MeanlibRobot() {
         Intake
         AutoChooser
         println("Activating AutoChooser! Is Red ${AutoChooser.redSide}")
+
+        // drop down menu for selecting tests
+        val testChooser = SendableChooser<String?>().apply {
+            setDefaultOption("None", null)
+            addOption("Drive Tests", "Drive Tests")
+        }
+        SmartDashboard.putData("RobotTests", testChooser)
     }
 
     override suspend fun enable() {
@@ -91,14 +99,21 @@ object Robot : MeanlibRobot() {
         Drive.headingSetpoint = Drive.heading
     }
 
+//    val testMap : Map<String, () -> Unit> = mapOf(
+//        Pair
+//    )
     override suspend fun test()  {
         println("test mode begin. Hi.")
 
-        turretOITest()
+//        turretOITest()
 //        Drive.steeringTests()
 //        Drive.driveTests()
 
-//        Drive.setAngleOffsets()
+        Drive.setAngleOffsets()
+
+        //val selectedTest = SmartDashboard.getString("RobotTests/selected", "None")
+
+
     }
 
 

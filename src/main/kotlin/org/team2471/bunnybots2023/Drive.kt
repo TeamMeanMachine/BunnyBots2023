@@ -60,7 +60,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             MotorController(SparkMaxID(Sparks.FRONT_LEFT_DRIVE)),
             MotorController(SparkMaxID(Sparks.FRONT_LEFT_STEER)),
             Vector2(-13.1, 13.1),
-            Preferences.getDouble("Angle Offset 0",-9.05).degrees,
+            Preferences.getDouble("Angle Offset 0",-262.49).degrees,
             DigitalSensors.FRONT_LEFT,
             odometer0Entry,
             0
@@ -69,7 +69,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             MotorController(SparkMaxID(Sparks.FRONT_RIGHT_DRIVE)),
             MotorController(SparkMaxID(Sparks.FRONT_RIGHT_STEER)),
             Vector2(13.1, 13.1),
-            Preferences.getDouble("Angle Offset 1",-253.4).degrees,
+            Preferences.getDouble("Angle Offset 1",-351.13).degrees,
             DigitalSensors.FRONT_RIGHT,
             odometer1Entry,
             1
@@ -78,7 +78,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             MotorController(SparkMaxID(Sparks.REAR_RIGHT_DRIVE)),
             MotorController(SparkMaxID(Sparks.REAR_RIGHT_STEER)),
             Vector2(13.1, -13.1),
-            Preferences.getDouble("Angle Offset 2",-345.05).degrees,
+            Preferences.getDouble("Angle Offset 2",-271.56).degrees,
             DigitalSensors.REAR_RIGHT,
             odometer2Entry,
             2
@@ -87,7 +87,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             MotorController(SparkMaxID(Sparks.REAR_LEFT_DRIVE)),
             MotorController(SparkMaxID(Sparks.REAR_LEFT_STEER)),
             Vector2(-13.1, -13.1),
-            Preferences.getDouble("Angle Offset 3",-308.41).degrees,
+            Preferences.getDouble("Angle Offset 3",-231.51).degrees,
             DigitalSensors.REAR_LEFT,
             odometer3Entry,
             3
@@ -145,6 +145,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     init {
         println("drive init")
         initializeSteeringMotors()
+
         GlobalScope.launch(MeanlibDispatcher) {
             println("in drive global scope")
             val headingEntry = table.getEntry("Heading")
@@ -225,7 +226,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 OI.driveTranslation * maxTranslation,
                 turn,
                 useGyro2,
-                useGyro2
+                false
                 )
             }
         }
