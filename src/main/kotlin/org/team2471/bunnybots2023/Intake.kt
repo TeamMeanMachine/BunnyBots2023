@@ -114,10 +114,10 @@ object Intake : Subsystem("Intake") {
     }
 
     fun intakeDown() {
-        solenoid.set(false)
+        solenoid.set(true)
     }
     fun intakeUp() {
-        solenoid.set(true)
+        solenoid.set(false)
     }
 
     override fun preEnable() {
