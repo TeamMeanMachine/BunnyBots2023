@@ -135,19 +135,18 @@ object Intake : Subsystem("Intake") {
         var delayTime = 0.0
         t.start()
 
-        periodic(period = 0.001) {
+        periodic(period = 0.005) {
             if (!disableConveyor) {
                 if (Shooter.ballReady) {
                     if (ballLoaded && !detectedBall) {
-//                        conveyorMotor.setPercentOutput(0.0)
-                      delayTime = t.get()
-                      detectedBall = true
+                        conveyorMotor.setPercentOutput(-0.1)
+                        detectedBall = true
+                        println("ball detected")
                     }
                     if (detectedBall && ballLoaded) {
                         conveyorMotor.setPercentOutput(0.0)
-                    } else if (detectedBall && t.get() - delayTime > 0.1) {
-                        conveyorMotor.setPercentOutput(-0.1)
-                    } else {
+                        println("stopping conveyor")
+                    }   else if (!ballLoaded) {
                         conveyorMotor.setPercentOutput(1.0)
                     }
                 } else {

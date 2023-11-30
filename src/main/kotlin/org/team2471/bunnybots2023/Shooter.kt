@@ -9,6 +9,7 @@ import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.TalonID
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
+import org.team2471.frc.lib.util.Timer
 
 
 object Shooter : Subsystem("Shooter") {
@@ -68,10 +69,15 @@ object Shooter : Subsystem("Shooter") {
 
     override suspend fun default() {
         var reverseBall = false
+        val t = Timer()
+        var waitTime = 0.0
+        var waiting = false
+        t.start()
         periodic(period = 0.005) {
             if (!disableUptake) {
                 if (reverseBall) {
 //                    println("REVERSING")
+                    uptakeMotor.setPercentOutput(-0.1)
                     if (ballReady) {
                         uptakeMotor.setPercentOutput(0.0)
                         reverseBall = false
@@ -81,16 +87,23 @@ object Shooter : Subsystem("Shooter") {
                         println("hiiiiiiiiiiii")
                     }
                     println("ball past sensor")
+                } else if (t.get() - waitTime > 0.2 && waiting) {
+                    println("finished time")
+                    reverseBall = true
+                    waiting = false
                 } else if (ballReady && !detectedBall) {
                     println("detected a ball!!")
-                    uptakeMotor.setPercentOutput(-0.1)
-                    reverseBall = true
-                } else if (!ballReady) {
+                    waitTime = t.get()
+                    detectedBall = true
+                    waiting = true
+                }  else if (!ballReady) {
                     uptakeMotor.setPercentOutput(1.0)
                 }
             } else {
                 uptakeMotor.setPercentOutput(0.0)
             }
+            shooterMotorOne.setPercentOutput(0.0)
+            shooterMotorTwo.setPercentOutput(0.0)
         }
     }
 }
