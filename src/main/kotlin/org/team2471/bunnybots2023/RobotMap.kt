@@ -39,8 +39,8 @@ object DigitalSensors {
 }
 
 object Falcons {
-    const val TURRET_ONE = 3
-    const val TURRET_TWO = 4
+    const val TURRET_ONE = 35
+    const val TURRET_TWO = 36
 }
 
 object CANCoders {

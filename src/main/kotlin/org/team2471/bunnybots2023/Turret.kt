@@ -5,6 +5,7 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.toFieldCentric
+import org.team2471.bunnybots2023.OI.opX
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
@@ -22,8 +23,8 @@ object Turret : Subsystem("Turret") {
     val turretAngleEntry = table.getEntry("Turret Angle")
     val turretSetpointEntry = table.getEntry("Turret Setpoint")
 
-
-    val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE))
+// Same direction
+    val turningMotor = MotorController(FalconID(Falcons.TURRET_TWO))
 
     val turretGearRatio: Double = 60.0/1.0
 
@@ -56,7 +57,7 @@ object Turret : Subsystem("Turret") {
     init {
 //        println("*******************************************************************************************************")
         turningMotor.restoreFactoryDefaults()
-        turningMotor.config(20) {
+        turningMotor.config() {
             //                          ticks / gear ratio
             feedbackCoefficient = 360.0 / 2048.0 / turretGearRatio
 
@@ -113,6 +114,13 @@ object Turret : Subsystem("Turret") {
                 if (Limelight.enemyBuckets.isNotEmpty()) {
                     aimAtBucket(Limelight.enemyBuckets[0])
                 }
+            }
+
+            if (opX) {
+                println("whhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
+                turretGO()
+            } else {
+                turretStop()
             }
         }
     }
