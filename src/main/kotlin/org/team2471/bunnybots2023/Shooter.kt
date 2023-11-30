@@ -31,6 +31,7 @@ object Shooter : Subsystem("Shooter") {
 //    var prevBallReady = ballReady
 
     var disableUptake = false
+    var detectedBall = false
 
     val rpm: Int
         get() = 0
@@ -67,11 +68,10 @@ object Shooter : Subsystem("Shooter") {
 
     override suspend fun default() {
         var reverseBall = false
-        var detectedBall = false
         periodic(period = 0.005) {
             if (!disableUptake) {
                 if (reverseBall) {
-                    println("REVERSING")
+//                    println("REVERSING")
                     if (ballReady) {
                         uptakeMotor.setPercentOutput(0.0)
                         reverseBall = false
@@ -87,7 +87,6 @@ object Shooter : Subsystem("Shooter") {
                     reverseBall = true
                 } else if (!ballReady) {
                     uptakeMotor.setPercentOutput(1.0)
-                    detectedBall = false
                 }
             } else {
                 uptakeMotor.setPercentOutput(0.0)

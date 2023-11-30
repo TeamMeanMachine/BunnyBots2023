@@ -2,14 +2,14 @@ package org.team2471.bunnybots2023
 
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DigitalInput
-import edu.wpi.first.wpilibj.PneumaticsModuleType
-import edu.wpi.first.wpilibj.Solenoid
+import edu.wpi.first.wpilibj.PneumaticHub
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.TalonID
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
+import org.team2471.frc.lib.util.Timer
 
 object Intake : Subsystem("Intake") {
     val table = NetworkTableInstance.getDefault().getTable("Intake")
@@ -26,9 +26,11 @@ object Intake : Subsystem("Intake") {
 
     val frontMotor = MotorController(TalonID(Talons.INTAKE_FRONT))
     val centerMotor = MotorController(TalonID(Talons.INTAKE_CENTER))
-    val solenoid = Solenoid(PneumaticsModuleType.REVPH, Solenoids.INTAKE)
     val conveyorMotor = MotorController(TalonID(Talons.HOPPER_CONVEYOR))
     val lowSensor = DigitalInput(DigitalSensors.HOPPER_LOW)
+    val pneumaticHub = PneumaticHub(OtherCAN.PNEUMATIC_HUB)
+    val solenoid = pneumaticHub.makeSolenoid(Solenoids.INTAKE)
+
 
     var ballLoaded = lowSensor.get()
         get() { prevBallLoaded = field; field = lowSensor.get(); return field }
@@ -44,6 +46,7 @@ object Intake : Subsystem("Intake") {
         get() = centerPowerEntry.getDouble(1.0).coerceIn(0.0, 1.0)
 
     var disableConveyor = false
+    var detectedBall = false
 
 
 
@@ -82,6 +85,7 @@ object Intake : Subsystem("Intake") {
                 ballLoadedEntry.setBoolean(ballLoaded)
                 disableConveyorEntry.setBoolean(disableConveyor)
 //                println("low ${lowSensor.get()}")
+                pneumaticHub.enableCompressorDigital()
             }
         }
     }
@@ -126,15 +130,27 @@ object Intake : Subsystem("Intake") {
     }
 
     override suspend fun default() {
-        var reverseBall = false
         var detectedBall = false
+        val t = Timer()
+        var delayTime = 0.0
+        t.start()
+
         periodic(period = 0.001) {
             if (!disableConveyor) {
-                if (ballLoaded && !prevBallLoaded) {
-                    println("detected a ball!!")
-                    conveyorMotor.setPercentOutput(0.0)
-                    reverseBall = true
-                } else if (!ballLoaded) {
+                if (Shooter.ballReady) {
+                    if (ballLoaded && !detectedBall) {
+//                        conveyorMotor.setPercentOutput(0.0)
+                      delayTime = t.get()
+                      detectedBall = true
+                    }
+                    if (detectedBall && ballLoaded) {
+                        conveyorMotor.setPercentOutput(0.0)
+                    } else if (detectedBall && t.get() - delayTime > 0.1) {
+                        conveyorMotor.setPercentOutput(-0.1)
+                    } else {
+                        conveyorMotor.setPercentOutput(1.0)
+                    }
+                } else {
                     conveyorMotor.setPercentOutput(1.0)
                     detectedBall = false
                 }

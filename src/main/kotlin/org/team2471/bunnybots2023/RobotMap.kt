@@ -50,3 +50,7 @@ object CANCoders {
 object Solenoids {
     const val INTAKE = 0
 }
+
+object OtherCAN {
+    const val PNEUMATIC_HUB = 22
+}

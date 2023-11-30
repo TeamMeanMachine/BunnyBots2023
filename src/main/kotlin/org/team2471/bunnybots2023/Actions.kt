@@ -23,8 +23,9 @@ suspend fun toggleBallCollection() = use(Shooter, Intake) {
 }
 suspend fun holdToSpit() = use(Intake, Shooter) {
     val prevIntaking = Intake.intaking
+    println("starting periodic")
     periodic {
-        if (OI.driverController.leftBumper) {
+        if (!OI.driverController.leftBumper) {
             this.stop()
         }
         Intake.centerMotor.setPercentOutput(-1.0)
@@ -32,6 +33,7 @@ suspend fun holdToSpit() = use(Intake, Shooter) {
         Intake.conveyorMotor.setPercentOutput(-1.0)
         Shooter.uptakeMotor.setPercentOutput(-1.0)
     }
+    println("stopping periodic")
     if (prevIntaking) {
         Intake.startIntake()
     } else {
