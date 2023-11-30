@@ -3,7 +3,7 @@
 package org.team2471.bunnybots2023
 
 object Talons {
-    const val INTAKE_FRONT = 99
+    const val INTAKE_FRONT = 14
     const val INTAKE_CENTER = 17
     const val HOPPER_UPTAKE = 8
     const val HOPPER_CONVEYOR = 7

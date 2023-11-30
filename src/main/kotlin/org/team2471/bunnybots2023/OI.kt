@@ -1,9 +1,5 @@
 package org.team2471.bunnybots2023
 
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.team2471.frc.lib.coroutines.MeanlibDispatcher
-import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.input.*
 import org.team2471.frc.lib.math.Vector2
@@ -11,8 +7,6 @@ import org.team2471.frc.lib.math.cube
 import org.team2471.frc.lib.math.deadband
 import org.team2471.frc.lib.math.squareWithSign
 import org.team2471.frc.lib.motion.following.xPose
-import org.team2471.frc.lib.units.radians
-import kotlin.math.atan2
 
 object OI : Subsystem("OI") {
     val driverController = XboxController(0)
@@ -28,10 +22,10 @@ object OI : Subsystem("OI") {
         get() = driverController.leftThumbstickY.deadband(deadBandDriver).squareWithSign()
 
     val driveTranslation: Vector2
-        get() = Vector2(driveTranslationX, driveTranslationY) //does owen want this cubed?
+        get() = Vector2(driveTranslationX, -driveTranslationY) //does owen want this cubed?
 
     val driveRotation: Double
-        get() = (driverController.rightThumbstickX.deadband(deadBandDriver)).cube() // * 0.6
+        get() = -(driverController.rightThumbstickX.deadband(deadBandDriver)).cube() // * 0.6
 
     val driveLeftTrigger: Double
         get() = driverController.leftTrigger
@@ -59,11 +53,15 @@ object OI : Subsystem("OI") {
 
     init {
         driverController::back.whenTrue {
-            Drive.zeroGyro();
+            Drive.zeroGyro()
             Drive.initializeSteeringMotors()
         }
         driverController::x.whenTrue { Drive.xPose() }
         driverController::rightBumper.whenTrue { Intake.toggleIntake() }
+        driverController::b.whenTrue { toggleBallCollection() }
+        driverController::leftBumper.whenTrue { holdToSpit() }
+
+
 
         operatorController::y.whenTrue { Intake.intakeUp()}
         operatorController::a.whenTrue { Intake.intakeDown()}

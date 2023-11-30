@@ -44,7 +44,6 @@ object Robot : MeanlibRobot() {
         println("NEVER GONNA GIVE YOU UP")
 
         OI
-        Drive
         println("Activating Drive!")
         Turret
         println("Activating Turret! ${Turret.turretSetpoint}")
@@ -54,9 +53,10 @@ object Robot : MeanlibRobot() {
 //        println("Activating Intake!")
         Shooter
         println("Activating Shooter!")
+        Drive
         Drive.zeroGyro()
         Drive.heading = 0.0.degrees
-
+        Intake
         AutoChooser
         println("Activating AutoChooser! Is Red ${AutoChooser.redSide}")
     }
@@ -64,8 +64,9 @@ object Robot : MeanlibRobot() {
     override suspend fun enable() {
         println("starting enable")
         Drive.enable()
+        Shooter.enable()
         Turret.enable()
-
+        Intake.enable()
         println("field centric? ${SmartDashboard.getBoolean("Use Gyro", true) && !DriverStation.isAutonomous()}")
         println("ending enable")
     }
@@ -92,8 +93,10 @@ object Robot : MeanlibRobot() {
 
     override suspend fun test()  {
         println("test mode begin. Hi.")
-        Drive.steeringTests()
-        Drive.driveTests()
+
+        turretOITest()
+//        Drive.steeringTests()
+//        Drive.driveTests()
 
 //        Drive.setAngleOffsets()
     }
@@ -103,6 +106,9 @@ object Robot : MeanlibRobot() {
         OI.driverController.rumble = 0.0
         OI.operatorController.rumble = 0.0
         Drive.disable()
+        periodic {
+//            println()
+        }
     }
 
     private fun initTimeMeasurement(){

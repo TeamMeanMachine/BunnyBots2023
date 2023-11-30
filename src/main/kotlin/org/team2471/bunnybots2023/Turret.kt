@@ -5,7 +5,6 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.toFieldCentric
-import org.team2471.bunnybots2023.Limelight.toRobotCentric
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
@@ -26,7 +25,7 @@ object Turret : Subsystem("Turret") {
 
     val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE))
 
-    val turretGearRatio: Double = 20.0/1.0
+    val turretGearRatio: Double = 60.0/1.0
 
     // robot centric
     val deadzoneAngle : Angle = -130.0.degrees
@@ -50,7 +49,7 @@ object Turret : Subsystem("Turret") {
                 angle = lowerDeadzone
             }
             angle = angle.wrap()
-            turningMotor.setPositionSetpoint(angle.toRobotCentric().asDegrees)
+//            turningMotor.setPositionSetpoint(angle.toRobotCentric().asDegrees)
             field = angle
         }
 
@@ -70,9 +69,9 @@ object Turret : Subsystem("Turret") {
             currentLimit(0, 20, 0)
 
             encoderType(FeedbackDevice.IntegratedSensor)
-//            burnSettings()
+            burnSettings()
+            setRawOffsetConfig(0.0)
         }
-        turningMotor.setRawOffset(0.0)
 
         GlobalScope.launch(MeanlibDispatcher) {
             periodic {
@@ -80,34 +79,40 @@ object Turret : Subsystem("Turret") {
                 turretCurrentEntry.setDouble(turningMotor.current)
                 turretSetpointEntry.setDouble(turretSetpoint.asDegrees)
 
-                // sets joystickTarget to the current angle of the right joystick, null if at center
-                val joystickTarget : Angle? = if (OI.driverController.rightThumbstick.length > Limelight.minJoystickDistance) {
-                    -atan2(OI.operatorRightY, OI.operatorRightX).radians
+
+
+            }
+        }
+    }
+
+    override suspend fun default() {
+
+        periodic {
+            // sets joystickTarget to the current angle of the right joystick, null if at center
+            val joystickTarget : Angle? = if (OI.driverController.rightThumbstick.length > Limelight.minJoystickDistance) {
+                -atan2(OI.operatorRightY, OI.operatorRightX).radians
+            } else {
+                null
+            }
+
+            // handle joystick input
+            if (joystickTarget != null) {
+
+                val upperAimingBound : Angle = joystickTarget + 20.0.degrees
+                val lowerAimingBound : Angle = joystickTarget - 20.0.degrees
+
+                val target : BucketTarget? = Limelight.getBucketInBounds(upperAimingBound, lowerAimingBound)
+
+                if (target != null) {
+                    //aimAtBucket(target)
                 } else {
-                    null
-                }
-                println(turningMotor.motorID)
-
-                // handle joystick input
-                if (joystickTarget != null) {
-
-                    val upperAimingBound : Angle = joystickTarget + 20.0.degrees
-                    val lowerAimingBound : Angle = joystickTarget - 20.0.degrees
-
-                    val target : BucketTarget? = Limelight.getBucketInBounds(upperAimingBound, lowerAimingBound)
-
-                    if (target != null) {
-                        aimAtBucket(target)
-                    } else {
-                        turretSetpoint = joystickTarget
-                    }
-
-                } else {
-                    if (Limelight.enemyBuckets.isNotEmpty()) {
-                        aimAtBucket(Limelight.enemyBuckets[0])
-                    }
+                   // turretSetpoint = joystickTarget
                 }
 
+            } else {
+                if (Limelight.enemyBuckets.isNotEmpty()) {
+                    aimAtBucket(Limelight.enemyBuckets[0])
+                }
             }
         }
     }
