@@ -98,6 +98,7 @@ object Shooter : Subsystem("Shooter") {
                     waiting = true
                 }  else if (!ballReady) {
                     uptakeMotor.setPercentOutput(1.0)
+                    Intake.detectedBall = false
                 }
             } else {
                 uptakeMotor.setPercentOutput(0.0)

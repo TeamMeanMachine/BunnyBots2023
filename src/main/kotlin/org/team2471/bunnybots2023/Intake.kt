@@ -32,9 +32,8 @@ object Intake : Subsystem("Intake") {
     val solenoid = pneumaticHub.makeSolenoid(Solenoids.INTAKE)
 
 
-    var ballLoaded = lowSensor.get()
-        get() { prevBallLoaded = field; field = lowSensor.get(); return field }
-    var prevBallLoaded = ballLoaded
+    val ballLoaded: Boolean
+        get() {return lowSensor.get()}
 
     val intaking: Boolean
         get() = frontMotor.current > 1.0
@@ -86,6 +85,10 @@ object Intake : Subsystem("Intake") {
                 disableConveyorEntry.setBoolean(disableConveyor)
 //                println("low ${lowSensor.get()}")
                 pneumaticHub.enableCompressorDigital()
+                if (lowSensor.get() && !detectedBall && Shooter.ballReady) {
+                    detectedBall = true
+                    println("setting detected ball to true")
+                }
             }
         }
     }
@@ -132,31 +135,14 @@ object Intake : Subsystem("Intake") {
     }
 
     override suspend fun default() {
-        var detectedBall = false
-        val t = Timer()
-        var delayTime = 0.0
-        t.start()
 
         periodic(period = 0.005) {
             if (!disableConveyor) {
-                if (Shooter.ballReady) {
-                    if (ballLoaded && !detectedBall) {
-                        conveyorMotor.setPercentOutput(-0.1)
-                        detectedBall = true
-                        println("ball detected")
-                    }
-                    if (detectedBall && ballLoaded) {
-                        conveyorMotor.setPercentOutput(0.0)
-                        println("stopping conveyor")
-                    }   else if (!ballLoaded) {
-                        conveyorMotor.setPercentOutput(1.0)
-                    }
+                if (detectedBall) {
+                    conveyorMotor.setPercentOutput(0.0)
                 } else {
                     conveyorMotor.setPercentOutput(1.0)
-                    detectedBall = false
                 }
-            } else {
-                conveyorMotor.setPercentOutput(0.0)
             }
         }
     }
