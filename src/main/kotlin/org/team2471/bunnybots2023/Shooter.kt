@@ -81,33 +81,38 @@ object Shooter : Subsystem("Shooter") {
         t.start()
         periodic(period = 0.005) {
             if (!disableUptake) {
-                if (reverseBall) {
-//                    println("REVERSING")
-                    uptakeMotor.setPercentOutput(-0.1)
-                    if (ballReady) {
-                        uptakeMotor.setPercentOutput(0.0)
-                        reverseBall = false
-                        println("exiting reverse")
-                        detectedBall = true
-                    } else {
-                        println("hiiiiiiiiiiii")
-                    }
-                    println("ball past sensor")
-                } else if (t.get() - waitTime > 0.1 && waiting) {
-                    println("finished time")
-                    reverseBall = true
-                    waiting = false
-                } else if (ballReady && !detectedBall) {
-                    println("detected a ball!!")
-                    waitTime = t.get()
-                    detectedBall = true
-                    waiting = true
-                }  else if (!ballReady) {
+//                if (reverseBall) {
+////                    println("REVERSING")
+//                    uptakeMotor.setPercentOutput(-0.1)
+//                    if (ballReady) {
+//                        uptakeMotor.setPercentOutput(0.0)
+//                        reverseBall = false
+//                        println("exiting reverse")
+//                        detectedBall = true
+//                    } else {
+//                        println("hiiiiiiiiiiii")
+//                    }
+//                    println("ball past sensor")
+//                } else if (t.get() - waitTime > 0.1 && waiting) {
+//                    println("finished time")
+//                    reverseBall = true
+//                    waiting = false
+//                } else if (ballReady && !detectedBall) {
+//                    println("detected a ball!!")
+//                    waitTime = t.get()
+//                    detectedBall = true
+//                    waiting = true
+//                }  else if (!ballReady) {
+//                    uptakeMotor.setPercentOutput(1.0)
+//                    Intake.detectedBall = false
+//                }
+                if (ballReady) {
+                    uptakeMotor.setPercentOutput(0.0)
+                } else {
                     uptakeMotor.setPercentOutput(1.0)
-                    Intake.detectedBall = false
                 }
-//                shooterMotorOne.setPercentOutput(1.0)
-//                shooterMotorTwo.setPercentOutput(1.0)
+                shooterMotorOne.setPercentOutput(0.5)
+                shooterMotorTwo.setPercentOutput(0.5)
             } else {
                 uptakeMotor.setPercentOutput(0.0)
                 shooterMotorOne.setPercentOutput(0.0)

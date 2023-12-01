@@ -131,19 +131,59 @@ object Intake : Subsystem("Intake") {
     }
 
     override suspend fun default() {
-
+        var startTime = 0.0
+        var startTimer = false
+        val t = Timer()
+        t.start()
         periodic(period = 0.005) {
-            if (lowSensor.get() && !detectedBall && Shooter.ballReady) {
-                detectedBall = true
-                println("setting detected ball to true")
-            }
             if (!disableConveyor) {
-                if (detectedBall) {
-                    conveyorMotor.setPercentOutput(0.0)
+                if (Shooter.ballReady) {
+                    if (startTimer) {
+                        if (startTime == 0.0) {
+                            startTime = t.get()
+                            println("resetting start time to t.get()")
+                        }
+                        if (t.get() - startTime > 0.15) {
+                            conveyorMotor.setPercentOutput(-0.3)
+//                        println("waited, running backwards")
+                            if (lowSensor.get()) {
+                                conveyorMotor.setPercentOutput(0.0)
+                                startTimer = false
+                                println("sensor triggered. stopping loop")
+                                detectedBall = true
+                            }
+                        }
+                        if (t.get() - startTime > 1.0) {
+                            println("loop took too long, resetting")
+                            startTime = 0.0
+                            startTimer = false
+                            detectedBall = false
+                        }
+
+                    } /*else if (lowSensor.get() && !detectedBall && Shooter.ballReady) {
+                    detectedBall = true
+                    println("setting detected ball to true")
+                }*/
+                    if (lowSensor.get() && !startTimer && !detectedBall) {
+                        println("detected ball, starting timer")
+                        conveyorMotor.setPercentOutput(0.0)
+                        startTimer = true
+                        startTime = 0.0
+                    } else if (!startTimer && !detectedBall) {
+                        conveyorMotor.setPercentOutput(1.0)
+                    }
                 } else {
                     conveyorMotor.setPercentOutput(1.0)
+                    startTimer = false
+                    startTime = 0.0
+                    detectedBall = false
                 }
+            } else {
+                conveyorMotor.setPercentOutput(0.0)
+                startTime = 0.0
+                startTimer = false
             }
+
         }
     }
 }

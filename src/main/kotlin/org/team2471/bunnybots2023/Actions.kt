@@ -8,6 +8,8 @@ import org.team2471.frc.lib.framework.use
 suspend fun fire() = use(Shooter) {
     println("FIRING!!!! IM SHOOTING BALL")
     Shooter.uptakeMotor.setPercentOutput(1.0)
+    Shooter.shooterMotorOne.setPercentOutput(1.0)
+    Shooter.shooterMotorTwo.setPercentOutput(1.0)
     Shooter.reverseBall = false
     delay(0.2)
 }
