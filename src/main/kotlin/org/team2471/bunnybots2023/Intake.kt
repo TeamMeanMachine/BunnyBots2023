@@ -85,10 +85,6 @@ object Intake : Subsystem("Intake") {
                 disableConveyorEntry.setBoolean(disableConveyor)
 //                println("low ${lowSensor.get()}")
                 pneumaticHub.enableCompressorDigital()
-                if (lowSensor.get() && !detectedBall && Shooter.ballReady) {
-                    detectedBall = true
-                    println("setting detected ball to true")
-                }
             }
         }
     }
@@ -137,6 +133,10 @@ object Intake : Subsystem("Intake") {
     override suspend fun default() {
 
         periodic(period = 0.005) {
+            if (lowSensor.get() && !detectedBall && Shooter.ballReady) {
+                detectedBall = true
+                println("setting detected ball to true")
+            }
             if (!disableConveyor) {
                 if (detectedBall) {
                     conveyorMotor.setPercentOutput(0.0)

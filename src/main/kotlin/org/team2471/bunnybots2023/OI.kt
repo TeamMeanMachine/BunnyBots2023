@@ -1,6 +1,5 @@
 package org.team2471.bunnybots2023
 
-import org.team2471.bunnybots2023.Turret.turretGO
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.input.*
 import org.team2471.frc.lib.math.Vector2

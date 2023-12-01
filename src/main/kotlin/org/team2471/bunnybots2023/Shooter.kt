@@ -93,7 +93,7 @@ object Shooter : Subsystem("Shooter") {
                         println("hiiiiiiiiiiii")
                     }
                     println("ball past sensor")
-                } else if (t.get() - waitTime > 0.2 && waiting) {
+                } else if (t.get() - waitTime > 0.1 && waiting) {
                     println("finished time")
                     reverseBall = true
                     waiting = false
