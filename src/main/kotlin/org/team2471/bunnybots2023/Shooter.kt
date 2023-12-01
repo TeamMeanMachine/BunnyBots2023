@@ -18,6 +18,8 @@ object Shooter : Subsystem("Shooter") {
     val ballReadyEntry = table.getEntry("Ball Ready")
     val uptakeCurrentEntry = table.getEntry("Uptake Current")
     val disableUptakeEntry = table.getEntry("Disabled Uptake")
+    val shooterOneCurrentEntry = table.getEntry("Shooter One Current")
+    val shooterTwoCurrentEntry = table.getEntry("Shooter Two Current")
 
 
     val shooterMotorOne = MotorController(TalonID(Talons.SHOOTER_ONE))
@@ -33,6 +35,8 @@ object Shooter : Subsystem("Shooter") {
 
     var disableUptake = false
     var detectedBall = false
+    var reverseBall = false
+
 
     val rpm: Int
         get() = 0
@@ -63,12 +67,14 @@ object Shooter : Subsystem("Shooter") {
                 ballReadyEntry.setBoolean(ballReady)
                 uptakeCurrentEntry.setDouble(uptakeMotor.current)
                 disableUptakeEntry.setBoolean(disableUptake)
+                shooterOneCurrentEntry.setDouble(shooterMotorOne.current)
+                shooterTwoCurrentEntry.setDouble(shooterMotorTwo.current)
             }
         }
     }
 
     override suspend fun default() {
-        var reverseBall = false
+        println("Shooter: Starting default")
         val t = Timer()
         var waitTime = 0.0
         var waiting = false
@@ -100,11 +106,14 @@ object Shooter : Subsystem("Shooter") {
                     uptakeMotor.setPercentOutput(1.0)
                     Intake.detectedBall = false
                 }
+//                shooterMotorOne.setPercentOutput(1.0)
+//                shooterMotorTwo.setPercentOutput(1.0)
             } else {
                 uptakeMotor.setPercentOutput(0.0)
+                shooterMotorOne.setPercentOutput(0.0)
+                shooterMotorTwo.setPercentOutput(0.0)
             }
-            shooterMotorOne.setPercentOutput(0.0)
-            shooterMotorTwo.setPercentOutput(0.0)
+
         }
     }
 }

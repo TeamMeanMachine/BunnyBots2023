@@ -128,4 +128,13 @@ object Turret : Subsystem("Turret") {
         turretSetpoint = Limelight.getAngleToBucket(target)
     }
 
+    fun turretRight() {
+        turretSetpoint += 15.degrees
+    }
+
+
+    fun turretLeft() {
+        turretSetpoint -= 15.degrees
+    }
+
 }

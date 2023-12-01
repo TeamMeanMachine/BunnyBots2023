@@ -1,5 +1,6 @@
 package org.team2471.bunnybots2023
 
+import org.team2471.bunnybots2023.Turret.turretGO
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.input.*
 import org.team2471.frc.lib.math.Vector2
@@ -50,6 +51,9 @@ object OI : Subsystem("OI") {
 
     val operatorRightY: Double
         get() = operatorController.rightThumbstickY.deadband(0.0)
+
+    val opX: Boolean
+        get() = operatorController::x.get()
 
     init {
         driverController::back.whenTrue {
