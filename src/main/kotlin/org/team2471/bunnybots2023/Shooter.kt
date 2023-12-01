@@ -20,6 +20,9 @@ object Shooter : Subsystem("Shooter") {
     val disableUptakeEntry = table.getEntry("Disabled Uptake")
     val shooterOneCurrentEntry = table.getEntry("Shooter One Current")
     val shooterTwoCurrentEntry = table.getEntry("Shooter Two Current")
+    val rpmEntry = table.getEntry("RPM")
+    val rpmSetpointEntry = table.getEntry("RPM Setpoint")
+    val shooterIdleEntry = table.getEntry("Shooter Idle Power")
 
 
     val shooterMotorOne = MotorController(TalonID(Talons.SHOOTER_ONE))
@@ -38,10 +41,12 @@ object Shooter : Subsystem("Shooter") {
     var reverseBall = false
 
 
-    val rpm: Int
-        get() = 0
-    var rpmSetpoint: Int = 0
+    val rpm: Double
+        get() = 0.0
+    var rpmSetpoint: Double = 0.0
         set(value) { field = value }
+    val shooterIdlePower: Double
+        get() = shooterIdleEntry.getDouble(0.8).coerceIn(0.0, 1.0)
 
     init {
 
@@ -59,6 +64,10 @@ object Shooter : Subsystem("Shooter") {
             inverted(true)
             coastMode()
         }
+        if (!shooterIdleEntry.exists()) {
+            shooterIdleEntry.setPersistent()
+            shooterIdleEntry.setDouble(0.5)
+        }
 
 
         GlobalScope.launch {
@@ -69,6 +78,8 @@ object Shooter : Subsystem("Shooter") {
                 disableUptakeEntry.setBoolean(disableUptake)
                 shooterOneCurrentEntry.setDouble(shooterMotorOne.current)
                 shooterTwoCurrentEntry.setDouble(shooterMotorTwo.current)
+                rpmEntry.setDouble(rpm)
+                rpmSetpointEntry.setDouble(rpmSetpoint)
             }
         }
     }
@@ -111,8 +122,19 @@ object Shooter : Subsystem("Shooter") {
                 } else {
                     uptakeMotor.setPercentOutput(1.0)
                 }
-                shooterMotorOne.setPercentOutput(0.5)
-                shooterMotorTwo.setPercentOutput(0.5)
+
+//                println(shooterIdlePower)
+
+
+
+                if (ballReady) {
+                    shooterMotorOne.setPercentOutput(shooterIdlePower)
+                    shooterMotorTwo.setPercentOutput(shooterIdlePower)
+                    waitTime = t.get()
+                } else if (t.get() - waitTime > 2.0) {
+                    shooterMotorOne.setPercentOutput(0.1)
+                    shooterMotorTwo.setPercentOutput(0.1)
+                }
             } else {
                 uptakeMotor.setPercentOutput(0.0)
                 shooterMotorOne.setPercentOutput(0.0)

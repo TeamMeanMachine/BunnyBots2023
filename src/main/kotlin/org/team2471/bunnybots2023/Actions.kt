@@ -3,15 +3,32 @@ package org.team2471.bunnybots2023
 import org.team2471.frc.lib.coroutines.delay
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.use
+import org.team2471.frc.lib.util.Timer
+import kotlin.math.absoluteValue
 
 
 suspend fun fire() = use(Shooter) {
     println("FIRING!!!! IM SHOOTING BALL")
-    Shooter.uptakeMotor.setPercentOutput(1.0)
     Shooter.shooterMotorOne.setPercentOutput(1.0)
     Shooter.shooterMotorTwo.setPercentOutput(1.0)
+    val t = Timer()
+    var waitingTime = 0.0
+    periodic {
+        println(Shooter.shooterMotorOne.current)
+        if ((Shooter.shooterMotorOne.current.absoluteValue - 12.0).absoluteValue < 2.0) {
+            println("current within 12")
+        } else {
+            waitingTime = t.get()
+        }
+        if (t.get() - waitingTime > 0.04) {
+            println("within 12 for 0.05 seconds")
+            this.stop()
+        }
+
+    }
+    Shooter.uptakeMotor.setPercentOutput(1.0)
     Shooter.reverseBall = false
-    delay(0.2)
+    delay(0.1)
 }
 suspend fun toggleBallCollection() = use(Shooter, Intake) {
     if (Shooter.disableUptake) {
