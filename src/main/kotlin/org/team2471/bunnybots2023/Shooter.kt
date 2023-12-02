@@ -119,8 +119,11 @@ object Shooter : Subsystem("Shooter") {
 //                }
                 if (ballReady) {
                     uptakeMotor.setPercentOutput(0.0)
-                } else {
+                    Intake.ballPast = false
+                } else if (Intake.ballPast) {
                     uptakeMotor.setPercentOutput(1.0)
+                } else {
+                    uptakeMotor.setPercentOutput(0.0)
                 }
 
 //                println(shooterIdlePower)
@@ -132,8 +135,8 @@ object Shooter : Subsystem("Shooter") {
                     shooterMotorTwo.setPercentOutput(shooterIdlePower)
                     waitTime = t.get()
                 } else if (t.get() - waitTime > 2.0) {
-                    shooterMotorOne.setPercentOutput(0.1)
-                    shooterMotorTwo.setPercentOutput(0.1)
+                    shooterMotorOne.setPercentOutput(0.0)
+                    shooterMotorTwo.setPercentOutput(0.0)
                 }
             } else {
                 uptakeMotor.setPercentOutput(0.0)

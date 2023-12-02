@@ -2,6 +2,7 @@ package org.team2471.bunnybots2023
 
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DigitalInput
+import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.PneumaticHub
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -46,6 +47,7 @@ object Intake : Subsystem("Intake") {
 
     var disableConveyor = false
     var detectedBall = false
+    var ballPast = false
 
 
 
@@ -105,10 +107,14 @@ object Intake : Subsystem("Intake") {
     }
 
     fun toggleIntake() {
-        if (intaking) {
-            stopIntake()
+        if (DriverStation.isEnabled()) {
+            if (intaking) {
+                stopIntake()
+            } else {
+                startIntake()
+            }
         } else {
-            startIntake()
+            println("enable before intaking")
         }
     }
 
@@ -128,6 +134,7 @@ object Intake : Subsystem("Intake") {
     override fun onDisable() {
         stopIntake()
         conveyorMotor.setPercentOutput(0.0)
+        OI.driverController.rumble = 0.0
     }
 
     override suspend fun default() {
@@ -177,11 +184,16 @@ object Intake : Subsystem("Intake") {
                     startTimer = false
                     startTime = 0.0
                     detectedBall = false
+                    if (lowSensor.get()) {
+                        ballPast = true
+                        println("ball past sensor when ball not ready, running uptake")
+                    }
                 }
             } else {
                 conveyorMotor.setPercentOutput(0.0)
                 startTime = 0.0
                 startTimer = false
+                ballPast = false
             }
 
         }
