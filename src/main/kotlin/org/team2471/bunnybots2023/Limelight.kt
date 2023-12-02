@@ -14,6 +14,7 @@ object Limelight : Subsystem("Limelight") {
     private val table = NetworkTableInstance.getDefault().getTable("Limg")
     private val target0XEntry = table.getEntry("Turret Current")
     private val validTargetsEntry = datatable.getEntry("tv")
+    private val ledModeEntry = datatable.getEntry("ledMode")
 
 
     private const val lengthHeightMinRatio = 3.5
@@ -144,6 +145,16 @@ object Limelight : Subsystem("Limelight") {
             }
         }
         return amount
+    }
+
+    fun toggleLight() {
+        if (ledModeEntry.getDouble(0.0).toInt() == 1) {
+            println("turning on limelight")
+            ledModeEntry.setDouble(0.0)
+        } else {
+            println("turning off limelight")
+            ledModeEntry.setDouble(1.0)
+        }
     }
 
 }

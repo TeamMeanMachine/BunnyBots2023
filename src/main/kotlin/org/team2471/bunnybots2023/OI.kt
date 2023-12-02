@@ -70,6 +70,7 @@ object OI : Subsystem("OI") {
         operatorController::y.whenTrue { Intake.intakeUp()}
         operatorController::a.whenTrue { Intake.intakeDown()}
         operatorController::b.whenTrue { toggleBallCollection() }
+        ({ operatorController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }
 
     }
 }

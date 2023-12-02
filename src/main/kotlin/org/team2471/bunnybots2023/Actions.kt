@@ -13,22 +13,27 @@ suspend fun fire() = use(Shooter) {
     Shooter.shooterMotorTwo.setPercentOutput(1.0)
     val t = Timer()
     var waitingTime = 0.0
+    var previousCurrent = 999.0
+    val ballWasLoaded = Intake.ballLoaded
     periodic {
-        println(Shooter.shooterMotorOne.current)
-        if ((Shooter.shooterMotorOne.current.absoluteValue - 12.0).absoluteValue < 2.0) {
-            println("current within 12")
+        val current = Shooter.shooterMotorOne.current
+        println(listOf(current, previousCurrent))
+        if ((Shooter.shooterMotorOne.current.absoluteValue - previousCurrent.absoluteValue).absoluteValue < 1.0) {
+            println("current difference less then 1")
         } else {
             waitingTime = t.get()
         }
         if (t.get() - waitingTime > 0.04) {
-            println("within 12 for 0.05 seconds")
+            println("difference less then 1 for 0.05 seconds")
             this.stop()
         }
+        previousCurrent = Shooter.shooterMotorOne.current
 
     }
     Shooter.uptakeMotor.setPercentOutput(1.0)
-    Shooter.reverseBall = false
     delay(0.1)
+    Shooter.reverseBall = false
+    Intake.ballPast = ballWasLoaded
 }
 suspend fun toggleBallCollection() = use(Shooter, Intake) {
     if (Shooter.disableUptake) {
