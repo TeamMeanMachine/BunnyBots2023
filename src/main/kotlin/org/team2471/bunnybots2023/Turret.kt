@@ -48,7 +48,15 @@ object Turret : Subsystem("Turret") {
     val turretAngle: Angle
         get() = turningMotor.position.degrees
     val turretEncoderAngle: Angle
-        get() = -((turretEncoder.voltage - 0.2) / 4.6 * 360.0 / (70.0/12.0) - 50.0).degrees
+        get() {
+            var rawAngle = -((turretEncoder.voltage - 0.2) / 4.6 * 360.0 / (70.0/12.0) - 50.0).degrees
+            var newAngle = rawAngle
+            if (rawAngle > 30.0.degrees) {
+                newAngle = rawAngle - 61.0.degrees
+            }
+//            println("rawAngle $rawAngle  newAngle $newAngle")
+            return newAngle
+        }
 
     val turretError: Angle
         get() = turretSetpoint.toRobotCentric() - turretAngle
@@ -105,7 +113,7 @@ object Turret : Subsystem("Turret") {
                 encoderVoltageEntry.setDouble(turretEncoder.voltage)
 
                 if (DriverStation.isEnabled()) {
-                    turretSetpointOffset = (OI.operatorRightX * 0.5).degrees
+                    turretSetpointOffset = (OI.operatorRightX).degrees
 //                    println("stick = ${OI.operatorRightX}")
                 }
             }
