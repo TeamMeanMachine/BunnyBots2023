@@ -133,6 +133,7 @@ object Intake : Subsystem("Intake") {
     }
     override fun onDisable() {
         stopIntake()
+        OI.driverController.rumble = 0.0
         conveyorMotor.setPercentOutput(0.0)
         OI.driverController.rumble = 0.0
     }

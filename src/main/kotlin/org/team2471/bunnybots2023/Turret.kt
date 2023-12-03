@@ -5,68 +5,80 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.toFieldCentric
+import org.team2471.bunnybots2023.Limelight.toRobotCentric
 import org.team2471.frc.lib.actuators.FalconID
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
+import org.team2471.frc.lib.coroutines.delay
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.degrees
 import org.team2471.frc.lib.units.radians
+import kotlin.math.abs
+import kotlin.math.absoluteValue
 import kotlin.math.atan2
 
 object Turret : Subsystem("Turret") {
 
     private val table = NetworkTableInstance.getDefault().getTable("Turret")
+    val turretErrorEntry = table.getEntry("Turret Error")
     val turretCurrentEntry = table.getEntry("Turret Current")
     val turretAngleEntry = table.getEntry("Turret Angle")
-    val turretSetpointEntry = table.getEntry("Turret Setpoint")
+    val fieldTurretSetpointEntry = table.getEntry("Field Centric Turret Setpoint")
+    val robotTurretSetpointEntry = table.getEntry("Robot Centric Turret Setpoint")
 
-// Same direction
-    val turningMotor = MotorController(FalconID(Falcons.TURRET_TWO))
+    // Same direction
+    val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
 
-    val turretGearRatio: Double = 60.0/1.0
+//                                Chain          Gears         Planetary
+    val turretGearRatio: Double = (70.0/12.0) * (64.0/32.0) * (4.0)
 
     // robot centric
-    val deadzoneAngle : Angle = -130.0.degrees
-    val deadzoneWidth : Angle = 10.0.degrees
+    val maxAngle : Angle = 100.0.degrees
+    val minAngle : Angle = (-230.0).degrees
 
     // in robot centric
     val turretAngle: Angle
         get() = turningMotor.position.degrees
 
+    val turretError: Angle
+        get() = turretSetpoint.toRobotCentric() - turretAngle
+
     // in field centric
     var turretSetpoint: Angle = 0.0.degrees
         set(value) {
-            println("HI!!!")
-            val upperDeadzone : Angle = (deadzoneAngle + deadzoneWidth/2.0).toFieldCentric()
-            val lowerDeadzone : Angle = (deadzoneAngle - deadzoneWidth/2.0).toFieldCentric()
-            // coerce angle out of deadzone
-            var angle = value.unWrap(deadzoneAngle)
-            if (angle < upperDeadzone && angle >= deadzoneAngle) {
-                angle = upperDeadzone
-            } else if (angle > lowerDeadzone && angle <= deadzoneAngle) {
-                angle = lowerDeadzone
+//            println("HI!!!")
+            var angle = value.toRobotCentric()
+
+            val minDist = (angle - minAngle).wrap()
+            val maxDist = (angle - maxAngle).wrap()
+
+            if (minDist.asDegrees.absoluteValue < maxDist.asDegrees.absoluteValue) {
+                angle = angle.unWrap(minAngle)
+            } else {
+                angle = angle.unWrap(maxAngle)
             }
-            angle = angle.wrap()
-//            turningMotor.setPositionSetpoint(angle.toRobotCentric().asDegrees)
-            field = angle
+
+            angle = angle.asDegrees.coerceIn(minAngle.asDegrees, maxAngle.asDegrees).degrees
+            turningMotor.setPositionSetpoint(angle.asDegrees)
+            field = angle.toFieldCentric()
         }
 
     init {
 //        println("*******************************************************************************************************")
         turningMotor.restoreFactoryDefaults()
         turningMotor.config() {
-            //                          ticks / gear ratio
-            feedbackCoefficient = 360.0 / 2048.0 / turretGearRatio
+            //                            ticks / gear ratio             fudge factor
+            feedbackCoefficient = (360.0 / 2048.0 / turretGearRatio) * (90.0/136.0)
 
-            brakeMode()
+            coastMode()
             inverted(false)
             pid {
-                p(0.00002)
+                p(0.0000002)
                 d(0.00005)
             }
-            currentLimit(0, 20, 0)
+            currentLimit(30, 40, 20)
 
             encoderType(FeedbackDevice.IntegratedSensor)
             burnSettings()
@@ -77,10 +89,9 @@ object Turret : Subsystem("Turret") {
             periodic {
                 turretAngleEntry.setDouble(turretAngle.asDegrees)
                 turretCurrentEntry.setDouble(turningMotor.current)
-                turretSetpointEntry.setDouble(turretSetpoint.asDegrees)
-
-
-
+                fieldTurretSetpointEntry.setDouble(turretSetpoint.asDegrees)
+                robotTurretSetpointEntry.setDouble(turretSetpoint.toRobotCentric().asDegrees)
+                turretErrorEntry.setDouble(turretError.asDegrees)
             }
         }
     }
@@ -89,8 +100,8 @@ object Turret : Subsystem("Turret") {
 
         periodic {
             // sets joystickTarget to the current angle of the right joystick, null if at center
-            val joystickTarget : Angle? = if (OI.driverController.rightThumbstick.length > Limelight.minJoystickDistance) {
-                -atan2(OI.operatorRightY, OI.operatorRightX).radians
+            val joystickTarget : Angle? = if (OI.operatorController.rightThumbstick.length > Limelight.minJoystickDistance) {
+                90.degrees + atan2(OI.operatorRightY, OI.operatorRightX).radians
             } else {
                 null
             }
@@ -104,16 +115,19 @@ object Turret : Subsystem("Turret") {
                 val target : BucketTarget? = Limelight.getBucketInBounds(upperAimingBound, lowerAimingBound)
 
                 if (target != null) {
-                    //aimAtBucket(target)
+                    aimAtBucket(target)
                 } else {
-                   // turretSetpoint = joystickTarget
+                    turretSetpoint = joystickTarget
                 }
 
+            } else if (Limelight.enemyBuckets.isNotEmpty()) {
+                aimAtBucket(Limelight.enemyBuckets[0])
             } else {
-                if (Limelight.enemyBuckets.isNotEmpty()) {
-                    aimAtBucket(Limelight.enemyBuckets[0])
-                }
+                turretSetpoint = turretSetpoint
+                println("setpoint = $turretSetpoint")
             }
+
+
 
 //            if (opX) {
 //                println("whhhhhhhhyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyyy")
@@ -129,12 +143,15 @@ object Turret : Subsystem("Turret") {
     }
 
     fun turretRight() {
-        turretSetpoint += 15.degrees
+//        turningMotor.setPercentOutput(0.5)
+//        delay(0.5)
+        turretSetpoint = 90.0.degrees
     }
 
 
     fun turretLeft() {
-        turretSetpoint -= 15.degrees
+//        turningMotor.setPercentOutput(0.0)
+        turretSetpoint = (-90.0).degrees
     }
 
 }

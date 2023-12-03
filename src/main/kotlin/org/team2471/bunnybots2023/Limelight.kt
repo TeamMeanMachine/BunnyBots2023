@@ -11,13 +11,11 @@ import org.team2471.frc.lib.units.degrees
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
-    private val table = NetworkTableInstance.getDefault().getTable("Limg")
-    private val target0XEntry = table.getEntry("Turret Current")
     private val validTargetsEntry = datatable.getEntry("tv")
     private val ledModeEntry = datatable.getEntry("ledMode")
 
 
-    private const val lengthHeightMinRatio = 3.5
+    private const val lengthHeightMinRatio = 2.5
     const val limelightHeight = 16 // inches
     const val limelightScreenWidth = 320
     const val limelightScreenHeight = 320
@@ -58,11 +56,11 @@ object Limelight : Subsystem("Limelight") {
     }
 
     fun Angle.toFieldCentric() : Angle {
-        return this - Drive.heading
+        return this + Drive.heading
     }
 
     fun Angle.toRobotCentric() : Angle {
-        return this + Drive.heading
+        return this - Drive.heading
     }
 
     val validTargets: Boolean
@@ -87,11 +85,12 @@ object Limelight : Subsystem("Limelight") {
         // find all long strips
         var longStrips = arrayListOf<Int>()
         for (entryNum in 0..7) {
+            //println(datatable.getEntry("thor${entryNum}").getDouble(0.0) / datatable.getEntry("tvert${entryNum}").getDouble(0.0))
             if (datatable.getEntry("thor${entryNum}").getDouble(0.0) / datatable.getEntry("tvert${entryNum}").getDouble(0.0) >= lengthHeightMinRatio) {
                 longStrips.add(entryNum)
             }
         }
-
+//        println("LongStrips: ${longStrips}")
         // find color of long strips
         var longStripsColor = IntArray(longStrips.size) {0}
         for (entryNum in 0 .. 7) {
@@ -114,7 +113,7 @@ object Limelight : Subsystem("Limelight") {
                         longStripsColor[i] += 1
                     }
                 }
-                //println("X: $shortStripX $longStripX $longStripHorizontal")
+//                println("X: $shortStripX $longStripX $longStripHorizontal")
             }
         }
 
@@ -131,8 +130,7 @@ object Limelight : Subsystem("Limelight") {
             ))
         }
 
-//        println("Targets: ")
-//        println(targets)
+//        println("Targets: $targets")
 
         return targets
     }

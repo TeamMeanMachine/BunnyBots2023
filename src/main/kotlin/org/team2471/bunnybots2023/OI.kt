@@ -71,6 +71,13 @@ object OI : Subsystem("OI") {
         operatorController::a.whenTrue { Intake.intakeDown()}
         operatorController::b.whenTrue { toggleBallCollection() }
         ({ operatorController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }
+//        ({operatorController.dPad == Controller.Direction.LEFT}).whenTrue {
+//            Turret.turretLeft()
+//        }
+//        ({operatorController.dPad == Controller.Direction.RIGHT}).whenTrue {
+//            Turret.turretRight()
+//        }
+
 
     }
 }

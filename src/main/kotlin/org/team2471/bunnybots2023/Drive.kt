@@ -138,6 +138,8 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
     var maxTranslation = 1.0
         get() =  if (demoMode) min(field, demoSpeed) else field
+    var maxRotation = 0.8
+        get() =  if (demoMode) min(field, demoSpeed) else field
 
     val isHumanDriving
         get() = OI.driveTranslation.length != 0.0 || OI.driveRotation != 0.0
@@ -217,14 +219,16 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             var turn = 0.0
             if (OI.driveRotation.absoluteValue > 0.001) {
                 turn = OI.driveRotation
+                turn = linearMap(0.0,90.0,turn,turn * 0.5, Turret.turretError.asDegrees)
             }
+
             if (!useGyroEntry.exists()) {
                 useGyroEntry.setBoolean(true)
             }
             val useGyro2 = useGyroEntry.getBoolean(true) && !DriverStation.isAutonomous()
             drive(
                 OI.driveTranslation * maxTranslation,
-                turn,
+                turn * maxRotation,
                 useGyro2,
                 false
                 )
