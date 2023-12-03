@@ -31,8 +31,7 @@ object Turret : Subsystem("Turret") {
     // Same direction
     val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
 
-//                                Chain          Gears         Planetary
-    val turretGearRatio: Double = (70.0/12.0) * (64.0/32.0) * (4.0)
+    val turretGearRatio: Double = 4.0 * (72.0/24.0) * (70.0/12.0)//(70.0/12.0) * (64.0/32.0) * (4.0)
 
     // robot centric
     val maxAngle : Angle = 100.0.degrees
@@ -70,13 +69,13 @@ object Turret : Subsystem("Turret") {
         turningMotor.restoreFactoryDefaults()
         turningMotor.config() {
             //                            ticks / gear ratio             fudge factor
-            feedbackCoefficient = (360.0 / 2048.0 / turretGearRatio) * (90.0/136.0)
+            feedbackCoefficient = (360.0 / 2048.0 / turretGearRatio)// * (90.0/136.0)
 
             coastMode()
             inverted(false)
             pid {
-                p(0.0000002)
-                d(0.00005)
+                p(0.00000016)//p(0.0000002)
+                d(0.00001)
             }
             currentLimit(30, 40, 20)
 
@@ -124,7 +123,7 @@ object Turret : Subsystem("Turret") {
                 aimAtBucket(Limelight.enemyBuckets[0])
             } else {
                 turretSetpoint = turretSetpoint
-                println("setpoint = $turretSetpoint")
+//                println("setpoint = $turretSetpoint")
             }
 
 
