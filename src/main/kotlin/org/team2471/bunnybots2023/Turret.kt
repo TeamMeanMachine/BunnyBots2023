@@ -2,6 +2,7 @@ package org.team2471.bunnybots2023
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.wpilibj.AnalogInput
 import edu.wpi.first.wpilibj.DriverStation
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,11 +29,14 @@ object Turret : Subsystem("Turret") {
     val turretAngleEntry = table.getEntry("Turret Angle")
     val fieldTurretSetpointEntry = table.getEntry("Field Centric Turret Setpoint")
     val robotTurretSetpointEntry = table.getEntry("Robot Centric Turret Setpoint")
+    val turretEncoderAngleEntry = table.getEntry("Turret Encoder Angle")
+    val encoderVoltageEntry = table.getEntry("Raw Encoder Voltage")
 
     const val minJoystickDistance = 0.5
 
     // Same direction
     val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
+    val turretEncoder = AnalogInput(AnalogSensors.TURRET_ENCODER)
 
     val turretGearRatio: Double = 4.0 * (72.0/24.0) * (70.0/12.0)//(70.0/12.0) * (64.0/32.0) * (4.0)
 
@@ -43,6 +47,8 @@ object Turret : Subsystem("Turret") {
     // in robot centric
     val turretAngle: Angle
         get() = turningMotor.position.degrees
+    val turretEncoderAngle: Angle
+        get() = -((turretEncoder.voltage - 0.2) / 4.6 * 360.0 / (70.0/12.0) - 50.0).degrees
 
     val turretError: Angle
         get() = turretSetpoint.toRobotCentric() - turretAngle
@@ -85,7 +91,7 @@ object Turret : Subsystem("Turret") {
 
             encoderType(FeedbackDevice.IntegratedSensor)
             burnSettings()
-            setRawOffsetConfig(0.0)
+            setRawOffsetConfig(turretEncoderAngle.asDegrees)
         }
 
         GlobalScope.launch(MeanlibDispatcher) {
@@ -95,9 +101,11 @@ object Turret : Subsystem("Turret") {
                 fieldTurretSetpointEntry.setDouble(turretSetpoint.asDegrees)
                 robotTurretSetpointEntry.setDouble(turretSetpoint.toRobotCentric().asDegrees)
                 turretErrorEntry.setDouble(turretError.asDegrees)
+                turretEncoderAngleEntry.setDouble(turretEncoderAngle.asDegrees)
+                encoderVoltageEntry.setDouble(turretEncoder.voltage)
 
                 if (DriverStation.isEnabled()) {
-                    turretSetpointOffset = (OI.operatorRightX).degrees
+                    turretSetpointOffset = (OI.operatorRightX * 0.5).degrees
 //                    println("stick = ${OI.operatorRightX}")
                 }
             }
