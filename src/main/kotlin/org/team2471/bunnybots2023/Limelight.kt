@@ -3,11 +3,14 @@ package org.team2471.bunnybots2023
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.team2471.bunnybots2023.Limelight.bucketWidth
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.degrees
+import org.team2471.frc.lib.units.feet
+import org.team2471.frc.lib.units.inches
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
@@ -19,7 +22,7 @@ object Limelight : Subsystem("Limelight") {
     const val limelightHeight = 16 // inches
     const val limelightScreenWidth = 320
     const val limelightScreenHeight = 320
-    const val minJoystickDistance = 0.1
+    const val bucketWidth = 10 + 2/8 // Inches
 
     var enemyBuckets : List<BucketTarget> = arrayListOf<BucketTarget>()
 
@@ -126,11 +129,14 @@ object Limelight : Subsystem("Limelight") {
                 longStrips[i],
                 longStripsColor[i] > 0,
                 datatable.getEntry("tx${longStrips[i]}").getDouble(0.0),
-                datatable.getEntry("ty${longStrips[i]}").getDouble(0.0)
+                datatable.getEntry("ty${longStrips[i]}").getDouble(0.0),
+                datatable.getEntry("thor${longStrips[i]}").getDouble(0.0)
             ))
         }
-
-//        println("Targets: $targets")
+//
+//        for (target in targets) {
+//            println("Target ${target.id} angleWidth: ${target.angleWidth} ")
+//        }
 
         return targets
     }
@@ -160,5 +166,9 @@ data class BucketTarget (
     val id: Int,
     val isRed: Boolean,
     val x: Double,
-    val y: Double
-)
+    val y: Double,
+    val pixelWidth: Double
+) {
+    val angleWidth = Angle.atan(pixelWidth * (29.8).degrees.tan())
+    val dist = ((bucketWidth / 2) / (angleWidth / 2.0).tan()).feet
+}

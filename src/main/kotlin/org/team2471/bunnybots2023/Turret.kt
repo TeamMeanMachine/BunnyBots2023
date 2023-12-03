@@ -2,6 +2,7 @@ package org.team2471.bunnybots2023
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
 import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.wpilibj.DriverStation
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.toFieldCentric
@@ -28,6 +29,8 @@ object Turret : Subsystem("Turret") {
     val fieldTurretSetpointEntry = table.getEntry("Field Centric Turret Setpoint")
     val robotTurretSetpointEntry = table.getEntry("Robot Centric Turret Setpoint")
 
+    const val minJoystickDistance = 0.5
+
     // Same direction
     val turningMotor = MotorController(FalconID(Falcons.TURRET_ONE), FalconID(Falcons.TURRET_TWO))
 
@@ -48,7 +51,7 @@ object Turret : Subsystem("Turret") {
     var turretSetpoint: Angle = 0.0.degrees
         set(value) {
 //            println("HI!!!")
-            var angle = value.toRobotCentric()
+            var angle = value.toRobotCentric() + turretSetpointOffset
 
             val minDist = (angle - minAngle).wrap()
             val maxDist = (angle - maxAngle).wrap()
@@ -63,6 +66,7 @@ object Turret : Subsystem("Turret") {
             turningMotor.setPositionSetpoint(angle.asDegrees)
             field = angle.toFieldCentric()
         }
+    var turretSetpointOffset: Angle = 0.0.degrees
 
     init {
 //        println("*******************************************************************************************************")
@@ -91,6 +95,11 @@ object Turret : Subsystem("Turret") {
                 fieldTurretSetpointEntry.setDouble(turretSetpoint.asDegrees)
                 robotTurretSetpointEntry.setDouble(turretSetpoint.toRobotCentric().asDegrees)
                 turretErrorEntry.setDouble(turretError.asDegrees)
+
+                if (DriverStation.isEnabled()) {
+                    turretSetpointOffset = (OI.operatorRightX).degrees
+//                    println("stick = ${OI.operatorRightX}")
+                }
             }
         }
     }
@@ -99,8 +108,8 @@ object Turret : Subsystem("Turret") {
 
         periodic {
             // sets joystickTarget to the current angle of the right joystick, null if at center
-            val joystickTarget : Angle? = if (OI.operatorController.rightThumbstick.length > Limelight.minJoystickDistance) {
-                90.degrees + atan2(OI.operatorRightY, OI.operatorRightX).radians
+            val joystickTarget : Angle? = if (OI.operatorController.leftThumbstick.length > minJoystickDistance) {
+                90.degrees + atan2(OI.operatorLeftY, OI.operatorLeftX).radians
             } else {
                 null
             }
@@ -137,6 +146,10 @@ object Turret : Subsystem("Turret") {
         }
     }
 
+    override fun preEnable() {
+        turretSetpoint = turretAngle.toFieldCentric()
+    }
+
     fun aimAtBucket(target : BucketTarget){
         turretSetpoint = Limelight.getAngleToBucket(target)
     }
@@ -145,6 +158,11 @@ object Turret : Subsystem("Turret") {
 //        turningMotor.setPercentOutput(0.5)
 //        delay(0.5)
         turretSetpoint = 90.0.degrees
+    }
+
+    fun zeroTurret() {
+        turningMotor.setRawOffset(0.0)
+        turretSetpoint = turretAngle.toFieldCentric()
     }
 
 

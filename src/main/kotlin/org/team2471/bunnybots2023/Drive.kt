@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.team2471.bunnybots2023.Limelight.toFieldCentric
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.SparkMaxID
 import org.team2471.frc.lib.control.PDConstantFController
@@ -210,8 +211,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     }
 
     fun zeroGyro() {
-        heading = if (AutoChooser.redSide) 180.0.degrees else 0.0.degrees
-        println("zeroed heading to $heading  alliance blue? ${AutoChooser.redSide}")
+        heading = 0.0.degrees
+        println("zeroed heading to $heading")//  alliance blue? ${AutoChooser.redSide}")
+        Turret.turretSetpoint = Turret.turretAngle.toFieldCentric()
     }
 
     override suspend fun default() {
@@ -333,7 +335,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             set(value) = turnMotor.setPositionSetpoint(-(angle + (value - angle).wrap()).asDegrees)
 
         override fun setDrivePower(power: Double) {
-            driveMotor.setPercentOutput(power)
+            driveMotor.setPercentOutput(-power)
         }
 
 

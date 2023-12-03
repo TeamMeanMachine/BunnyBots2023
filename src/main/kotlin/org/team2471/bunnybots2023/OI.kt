@@ -25,7 +25,7 @@ object OI : Subsystem("OI") {
         get() = Vector2(driveTranslationX, -driveTranslationY) //does owen want this cubed?
 
     val driveRotation: Double
-        get() = -(driverController.rightThumbstickX.deadband(deadBandDriver)).cube() // * 0.6
+        get() = (driverController.rightThumbstickX.deadband(deadBandDriver)).cube() // * 0.6
 
     val driveLeftTrigger: Double
         get() = driverController.leftTrigger
@@ -46,7 +46,7 @@ object OI : Subsystem("OI") {
         get() = operatorController.rightTrigger
 
     val operatorRightX: Double
-        get() = operatorController.rightThumbstickX.deadband(0.0)
+        get() = operatorController.rightThumbstickX.deadband(0.2)
 
     val operatorRightY: Double
         get() = operatorController.rightThumbstickY.deadband(0.0)
@@ -70,6 +70,7 @@ object OI : Subsystem("OI") {
         operatorController::y.whenTrue { Intake.intakeUp()}
         operatorController::a.whenTrue { Intake.intakeDown()}
         operatorController::b.whenTrue { toggleBallCollection() }
+        operatorController::back.whenTrue { Turret.zeroTurret() }
         ({ operatorController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }
 //        ({operatorController.dPad == Controller.Direction.LEFT}).whenTrue {
 //            Turret.turretLeft()
