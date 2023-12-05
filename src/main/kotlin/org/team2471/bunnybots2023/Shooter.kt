@@ -46,7 +46,7 @@ object Shooter : Subsystem("Shooter") {
     var rpmSetpoint: Double = 0.0
         set(value) { field = value }
     val shooterIdlePower: Double
-        get() = shooterIdleEntry.getDouble(0.8).coerceIn(0.0, 1.0)
+        get() = shooterIdleEntry.getDouble(0.85).coerceIn(0.0, 1.0)
 
     init {
 
@@ -58,6 +58,7 @@ object Shooter : Subsystem("Shooter") {
         shooterMotorTwo.config {
             currentLimit(30, 40, 0)
             coastMode()
+            openLoopRamp(1.5)
         }
         shooterMotorOne.config {
             currentLimit(30, 40, 0)
@@ -66,7 +67,7 @@ object Shooter : Subsystem("Shooter") {
         }
         if (!shooterIdleEntry.exists()) {
             shooterIdleEntry.setPersistent()
-            shooterIdleEntry.setDouble(0.5)
+            shooterIdleEntry.setDouble(0.85)
         }
 
 
@@ -92,31 +93,7 @@ object Shooter : Subsystem("Shooter") {
         t.start()
         periodic(period = 0.005) {
             if (!disableUptake) {
-//                if (reverseBall) {
-////                    println("REVERSING")
-//                    uptakeMotor.setPercentOutput(-0.1)
-//                    if (ballReady) {
-//                        uptakeMotor.setPercentOutput(0.0)
-//                        reverseBall = false
-//                        println("exiting reverse")
-//                        detectedBall = true
-//                    } else {
-//                        println("hiiiiiiiiiiii")
-//                    }
-//                    println("ball past sensor")
-//                } else if (t.get() - waitTime > 0.1 && waiting) {
-//                    println("finished time")
-//                    reverseBall = true
-//                    waiting = false
-//                } else if (ballReady && !detectedBall) {
-//                    println("detected a ball!!")
-//                    waitTime = t.get()
-//                    detectedBall = true
-//                    waiting = true
-//                }  else if (!ballReady) {
-//                    uptakeMotor.setPercentOutput(1.0)
-//                    Intake.detectedBall = false
-//                }
+
                 if (ballReady) {
                     uptakeMotor.setPercentOutput(0.0)
                     Intake.ballPast = false
@@ -125,10 +102,6 @@ object Shooter : Subsystem("Shooter") {
                 } else {
                     uptakeMotor.setPercentOutput(0.0)
                 }
-
-//                println(shooterIdlePower)
-
-
 
                 if (ballReady) {
                     shooterMotorOne.setPercentOutput(shooterIdlePower)

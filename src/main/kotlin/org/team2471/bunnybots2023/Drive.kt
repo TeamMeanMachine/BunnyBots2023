@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.team2471.bunnybots2023.Limelight.toFieldCentric
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.SparkMaxID
 import org.team2471.frc.lib.control.PDConstantFController
@@ -138,6 +139,8 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
     var maxTranslation = 1.0
         get() =  if (demoMode) min(field, demoSpeed) else field
+    var maxRotation = 0.8
+        get() =  if (demoMode) min(field, demoSpeed) else field
 
     val isHumanDriving
         get() = OI.driveTranslation.length != 0.0 || OI.driveRotation != 0.0
@@ -208,8 +211,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     }
 
     fun zeroGyro() {
-        heading = if (AutoChooser.redSide) 180.0.degrees else 0.0.degrees
-        println("zeroed heading to $heading  alliance blue? ${AutoChooser.redSide}")
+        heading = 0.0.degrees
+        println("zeroed heading to $heading")//  alliance blue? ${AutoChooser.redSide}")
+        Turret.turretSetpoint = Turret.turretAngle.toFieldCentric()
     }
 
     override suspend fun default() {
@@ -217,14 +221,16 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             var turn = 0.0
             if (OI.driveRotation.absoluteValue > 0.001) {
                 turn = OI.driveRotation
+                turn = linearMap(0.0,90.0,turn,turn * 0.5, Turret.turretError.asDegrees)
             }
+
             if (!useGyroEntry.exists()) {
                 useGyroEntry.setBoolean(true)
             }
             val useGyro2 = useGyroEntry.getBoolean(true) && !DriverStation.isAutonomous()
             drive(
                 OI.driveTranslation * maxTranslation,
-                turn,
+                turn * maxRotation,
                 useGyro2,
                 false
                 )
@@ -329,7 +335,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             set(value) = turnMotor.setPositionSetpoint(-(angle + (value - angle).wrap()).asDegrees)
 
         override fun setDrivePower(power: Double) {
-            driveMotor.setPercentOutput(power)
+            driveMotor.setPercentOutput(-power)
         }
 
 

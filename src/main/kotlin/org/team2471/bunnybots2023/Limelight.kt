@@ -3,25 +3,26 @@ package org.team2471.bunnybots2023
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.team2471.bunnybots2023.Limelight.bucketWidth
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.degrees
+import org.team2471.frc.lib.units.feet
+import org.team2471.frc.lib.units.inches
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
-    private val table = NetworkTableInstance.getDefault().getTable("Limg")
-    private val target0XEntry = table.getEntry("Turret Current")
     private val validTargetsEntry = datatable.getEntry("tv")
     private val ledModeEntry = datatable.getEntry("ledMode")
 
 
-    private const val lengthHeightMinRatio = 3.5
+    private const val lengthHeightMinRatio = 2.5
     const val limelightHeight = 16 // inches
     const val limelightScreenWidth = 320
     const val limelightScreenHeight = 320
-    const val minJoystickDistance = 0.1
+    const val bucketWidth = 10 + 2/8 // Inches
 
     var enemyBuckets : List<BucketTarget> = arrayListOf<BucketTarget>()
 
@@ -58,11 +59,11 @@ object Limelight : Subsystem("Limelight") {
     }
 
     fun Angle.toFieldCentric() : Angle {
-        return this - Drive.heading
+        return this + Drive.heading
     }
 
     fun Angle.toRobotCentric() : Angle {
-        return this + Drive.heading
+        return this - Drive.heading
     }
 
     val validTargets: Boolean
@@ -87,11 +88,12 @@ object Limelight : Subsystem("Limelight") {
         // find all long strips
         var longStrips = arrayListOf<Int>()
         for (entryNum in 0..7) {
+            //println(datatable.getEntry("thor${entryNum}").getDouble(0.0) / datatable.getEntry("tvert${entryNum}").getDouble(0.0))
             if (datatable.getEntry("thor${entryNum}").getDouble(0.0) / datatable.getEntry("tvert${entryNum}").getDouble(0.0) >= lengthHeightMinRatio) {
                 longStrips.add(entryNum)
             }
         }
-
+//        println("LongStrips: ${longStrips}")
         // find color of long strips
         var longStripsColor = IntArray(longStrips.size) {0}
         for (entryNum in 0 .. 7) {
@@ -114,7 +116,7 @@ object Limelight : Subsystem("Limelight") {
                         longStripsColor[i] += 1
                     }
                 }
-                //println("X: $shortStripX $longStripX $longStripHorizontal")
+//                println("X: $shortStripX $longStripX $longStripHorizontal")
             }
         }
 
@@ -127,12 +129,14 @@ object Limelight : Subsystem("Limelight") {
                 longStrips[i],
                 longStripsColor[i] > 0,
                 datatable.getEntry("tx${longStrips[i]}").getDouble(0.0),
-                datatable.getEntry("ty${longStrips[i]}").getDouble(0.0)
+                datatable.getEntry("ty${longStrips[i]}").getDouble(0.0),
+                datatable.getEntry("thor${longStrips[i]}").getDouble(0.0)
             ))
         }
-
-//        println("Targets: ")
-//        println(targets)
+//
+//        for (target in targets) {
+//            println("Target ${target.id} angleWidth: ${target.angleWidth} ")
+//        }
 
         return targets
     }
@@ -162,5 +166,9 @@ data class BucketTarget (
     val id: Int,
     val isRed: Boolean,
     val x: Double,
-    val y: Double
-)
+    val y: Double,
+    val pixelWidth: Double
+) {
+    val angleWidth = Angle.atan(pixelWidth * (29.8).degrees.tan())
+    val dist = ((bucketWidth / 2) / (angleWidth / 2.0).tan()).feet
+}

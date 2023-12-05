@@ -14,7 +14,7 @@ suspend fun fire() = use(Shooter) {
     val t = Timer()
     var waitingTime = 0.0
     var previousCurrent = 999.0
-    val ballWasLoaded = Intake.ballLoaded
+    val ballWasLoaded = Intake.detectedBall
     periodic {
         val current = Shooter.shooterMotorOne.current
         println(listOf(current, previousCurrent))
