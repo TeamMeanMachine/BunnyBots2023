@@ -63,12 +63,12 @@ object OI : Subsystem("OI") {
         driverController::rightBumper.whenTrue { Intake.toggleIntake() }
         driverController::b.whenTrue { toggleBallCollection() }
         driverController::leftBumper.whenTrue { holdToSpit() }
+        driverController::y.whenTrue { Intake.intakeUp()}
+        driverController::a.whenTrue { Intake.intakeDown()}
 
 
 
         operatorController::rightTriggerFullPress.whenTrue { fire() }
-        operatorController::y.whenTrue { Intake.intakeUp()}
-        operatorController::a.whenTrue { Intake.intakeDown()}
         operatorController::b.whenTrue { toggleBallCollection() }
         ({ operatorController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }
 
