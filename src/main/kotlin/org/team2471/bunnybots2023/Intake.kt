@@ -41,9 +41,9 @@ object Intake : Subsystem("Intake") {
     val isDown = solenoid.get()
 
     val frontPower: Double
-        get() = frontPowerEntry.getDouble(1.0).coerceIn(0.0, 1.0)
+        get() = frontPowerEntry.getDouble(0.5).coerceIn(0.0, 1.0)
     val centerPower: Double
-        get() = centerPowerEntry.getDouble(1.0).coerceIn(0.0, 1.0)
+        get() = centerPowerEntry.getDouble(0.5).coerceIn(0.0, 1.0)
 
     var disableConveyor = false
     var detectedBall = false
@@ -55,16 +55,16 @@ object Intake : Subsystem("Intake") {
     init {
 
         frontMotor.config {
-           currentLimit(30, 40,0)
+           currentLimit(15, 20,0)
            inverted(true)
 //           coastMode()
         }
         centerMotor.config {
-            currentLimit(30, 40, 0)
+            currentLimit(10, 15, 0)
 //            coastMode()
         }
         conveyorMotor.config {
-            currentLimit(30, 40, 0)
+            currentLimit(25, 30, 0)
             brakeMode()
         }
 

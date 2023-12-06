@@ -9,16 +9,15 @@ import kotlin.math.absoluteValue
 
 suspend fun fire() = use(Shooter) {
     println("FIRING!!!! IM SHOOTING BALL")
-    Shooter.shooterMotorOne.setPercentOutput(1.0)
-    Shooter.shooterMotorTwo.setPercentOutput(1.0)
+    Shooter.shooterMotor.setPercentOutput(1.0)
     val t = Timer()
     var waitingTime = 0.0
     var previousCurrent = 999.0
     val ballWasLoaded = Intake.detectedBall
     periodic {
-        val current = Shooter.shooterMotorOne.current
+        val current = Shooter.shooterMotor.current
         println(listOf(current, previousCurrent))
-        if ((Shooter.shooterMotorOne.current.absoluteValue - previousCurrent.absoluteValue).absoluteValue < 1.0) {
+        if ((Shooter.shooterMotor.current.absoluteValue - previousCurrent.absoluteValue).absoluteValue < 1.0) {
             println("current difference less then 1")
         } else {
             waitingTime = t.get()
@@ -27,7 +26,7 @@ suspend fun fire() = use(Shooter) {
             println("difference less then 1 for 0.05 seconds")
             this.stop()
         }
-        previousCurrent = Shooter.shooterMotorOne.current
+        previousCurrent = Shooter.shooterMotor.current
 
     }
     Shooter.uptakeMotor.setPercentOutput(1.0)
