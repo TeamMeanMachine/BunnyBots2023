@@ -46,6 +46,17 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     val motorAngle2Entry = table.getEntry("Motor Angle 2")
     val motorAngle3Entry = table.getEntry("Motor Angle 3")
 
+    val turnMotor1CurrentEntry = table.getEntry("Turn Current 1")
+    val turnMotor2CurrentEntry = table.getEntry("Turn Current 2")
+    val turnMotor3CurrentEntry = table.getEntry("Turn Current 3")
+    val turnMotor4CurrentEntry = table.getEntry("Turn Current 4")
+
+    val driveMotor1CurrentEntry = table.getEntry("Drive Current 1")
+    val driveMotor2CurrentEntry = table.getEntry("Drive Current 2")
+    val driveMotor3CurrentEntry = table.getEntry("Drive Current 3")
+    val driveMotor4CurrentEntry = table.getEntry("Drive Current 4")
+
+
     val useGyroEntry = table.getEntry("Use Gyro")
 
     val plannedPathEntry = table.getEntry("Planned Path")
@@ -186,6 +197,17 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 absoluteAngle1Entry.setDouble((modules[1] as Module).absoluteAngle.asDegrees)
                 absoluteAngle2Entry.setDouble((modules[2] as Module).absoluteAngle.asDegrees)
                 absoluteAngle3Entry.setDouble((modules[3] as Module).absoluteAngle.asDegrees)
+
+                turnMotor1CurrentEntry.setDouble((modules[0] as Module).turnMotor.current)
+                turnMotor2CurrentEntry.setDouble((modules[1] as Module).turnMotor.current)
+                turnMotor3CurrentEntry.setDouble((modules[2] as Module).turnMotor.current)
+                turnMotor4CurrentEntry.setDouble((modules[3] as Module).turnMotor.current)
+
+                driveMotor1CurrentEntry.setDouble((modules[0] as Module).driveCurrent)
+                driveMotor2CurrentEntry.setDouble((modules[1] as Module).driveCurrent)
+                driveMotor3CurrentEntry.setDouble((modules[2] as Module).driveCurrent)
+                driveMotor4CurrentEntry.setDouble((modules[3] as Module).driveCurrent)
+
             }
         }
     }
@@ -352,7 +374,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 coastMode()
                 println("Absolute Angle: ${absoluteAngle.asDegrees}")
                 setRawOffsetConfig(absoluteAngle.asDegrees)
-                currentLimit(25, 30, 1)
+                currentLimit(10, 15, 1)
                 pid {
                     p(0.0002)
 //                    d(0.0000025)
@@ -362,7 +384,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 brakeMode()
                 //                    wheel diam / 12 in per foot * pi / ticks / gear ratio
                 feedbackCoefficient = 3.0 / 12.0 * Math.PI / 42.0 / 4.71
-                currentLimit(25, 30, 1)
+                currentLimit(20, 25, 1)
 //                openLoopRamp(0.2)
             }
             GlobalScope.launch {
