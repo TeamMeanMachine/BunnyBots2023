@@ -374,7 +374,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 coastMode()
                 println("Absolute Angle: ${absoluteAngle.asDegrees}")
                 setRawOffsetConfig(absoluteAngle.asDegrees)
-                currentLimit(10, 15, 1)
+                currentLimit(15, 20, 1)
                 pid {
                     p(0.0002)
 //                    d(0.0000025)
@@ -384,7 +384,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 brakeMode()
                 //                    wheel diam / 12 in per foot * pi / ticks / gear ratio
                 feedbackCoefficient = 3.0 / 12.0 * Math.PI / 42.0 / 4.71
-                currentLimit(20, 25, 1)
+                currentLimit(25, 30, 1)
 //                openLoopRamp(0.2)
             }
             GlobalScope.launch {
