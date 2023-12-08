@@ -7,10 +7,9 @@ import org.team2471.bunnybots2023.Limelight.bucketWidth
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
-import org.team2471.frc.lib.units.Angle
-import org.team2471.frc.lib.units.degrees
-import org.team2471.frc.lib.units.feet
-import org.team2471.frc.lib.units.inches
+import org.team2471.frc.lib.math.Vector2
+import org.team2471.frc.lib.units.*
+import kotlin.math.atan2
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
@@ -38,6 +37,7 @@ object Limelight : Subsystem("Limelight") {
         GlobalScope.launch(MeanlibDispatcher) {
 
             periodic {
+                val prevEnemyBuckets = enemyBuckets
                 enemyBuckets = identifyBuckets()
                 if (enemyBuckets.isNotEmpty()) {
 //                    for (i in filteredTargets!!) {
@@ -46,16 +46,15 @@ object Limelight : Subsystem("Limelight") {
                     enemyBuckets = enemyBuckets.filter {
                         it.isRed == AutoChooser.redSide
                     }
+                    if (prevEnemyBuckets.isNotEmpty() && enemyBuckets.isNotEmpty()) {
+                        enemyBuckets[0].prevTarget = prevEnemyBuckets[0]
+                    }
+//                    println(enemyBuckets[0].prevTarget)
                 }
 
 
             }
         }
-    }
-
-    // returns field-centric angle to bucket
-    fun getAngleToBucket(bucket: BucketTarget) : Angle {
-        return limelightAngle + Angle.atan(bucket.x * (29.8).degrees.tan())
     }
 
     fun Angle.toFieldCentric() : Angle {
@@ -73,7 +72,7 @@ object Limelight : Subsystem("Limelight") {
     fun getBucketInBounds(upperBound: Angle, lowerBound: Angle) : BucketTarget? {
         var foundTarget : BucketTarget? = null
         for (target in enemyBuckets.indices) {
-            val angleToBucket : Angle = getAngleToBucket(enemyBuckets[target]).unWrap((upperBound + lowerBound)/2.0)
+            val angleToBucket : Angle = enemyBuckets[target].angle.unWrap((upperBound + lowerBound)/2.0)
             if (lowerBound < angleToBucket &&
                 angleToBucket < upperBound) {
                 foundTarget = enemyBuckets[target]
@@ -167,8 +166,34 @@ data class BucketTarget (
     val isRed: Boolean,
     val x: Double,
     val y: Double,
-    val pixelWidth: Double
+    val pixelWidth: Double,
+    var prevTarget: BucketTarget? = null
 ) {
+    val angle = Limelight.limelightAngle + Angle.atan(x * (29.8).degrees.tan())
     val angleWidth = Angle.atan(pixelWidth * (29.8).degrees.tan())
     val dist = ((bucketWidth / 2) / (angleWidth / 2.0).tan()).feet
+    val botCentCoords = Vector2((angle.sin()/dist.asFeet), (angle.cos()/dist.asFeet))
+    var vBotCentCoords = Vector2(0.0, 0.0)
+    var vAngle = 0.0.degrees
+
+    init {
+
+
+        if (prevTarget != null){
+            vBotCentCoords = botCentCoords - prevTarget!!.botCentCoords
+            vAngle = angle - prevTarget!!.angle
+
+        } else {
+//            println("Oh No!")
+        }
+    }
+
+    fun pBotCentCoords(ticks: Int): Vector2{
+
+        return botCentCoords + (vBotCentCoords.times(ticks.toDouble()))
+    }
+
+    fun pAngle(ticks: Int): Angle{
+        return angle + vAngle.times(ticks.toDouble())
+    }
 }

@@ -167,7 +167,8 @@ object Turret : Subsystem("Turret") {
     }
 
     fun aimAtBucket(target : BucketTarget){
-        turretSetpoint = Limelight.getAngleToBucket(target)
+        turretSetpoint = target.pAngle(10)
+//        println(target.vAngle)
     }
 
     fun turretRight() {
