@@ -26,8 +26,8 @@ object Intake : Subsystem("Intake") {
     val conveyorCurrentEntry = table.getEntry("Conveyor Current")
 
 
-    val frontMotor = MotorController(TalonID(Talons.INTAKE_FRONT))
-    val centerMotor = MotorController(TalonID(Talons.INTAKE_CENTER))
+    val frontMotor = MotorController(TalonID(Talons.INTAKE_FRONT_LEADER), TalonID(Talons.INTAKE_FRONT_FOLLOWER))
+    val centerMotor = MotorController(TalonID(Talons.INTAKE_CENTER_LEFT), TalonID(Talons.INTAKE_CENTER_RIGHT))
     val conveyorMotor = MotorController(TalonID(Talons.HOPPER_CONVEYOR))
     val lowSensor = DigitalInput(DigitalSensors.HOPPER_LOW)
     val pneumaticHub = PneumaticHub(OtherCAN.PNEUMATIC_HUB)
@@ -44,7 +44,7 @@ object Intake : Subsystem("Intake") {
     val frontPower: Double
         get() = frontPowerEntry.getDouble(0.5).coerceIn(0.0, 1.0)
     val centerPower: Double
-        get() = centerPowerEntry.getDouble(0.5).coerceIn(0.0, 1.0)
+        get() = centerPowerEntry.getDouble(0.3).coerceIn(0.0, 1.0)
 
     var disableConveyor = false
     var detectedBall = false
@@ -58,6 +58,7 @@ object Intake : Subsystem("Intake") {
         frontMotor.config {
            currentLimit(15, 20,0)
            inverted(true)
+           followersInverted(true)
 //           coastMode()
         }
         centerMotor.config {
@@ -70,11 +71,11 @@ object Intake : Subsystem("Intake") {
         }
 
         if (!frontPowerEntry.exists()) {
-           frontPowerEntry.setDouble(1.0)
+           frontPowerEntry.setDouble(0.5)
            frontPowerEntry.setPersistent()
         }
         if (!centerPowerEntry.exists()) {
-            centerPowerEntry.setDouble(1.0)
+            centerPowerEntry.setDouble(0.3)
             centerPowerEntry.setPersistent()
         }
 
@@ -94,8 +95,8 @@ object Intake : Subsystem("Intake") {
     }
 
     fun startIntake() {
-        frontMotor.setPercentOutput(frontPower)
-        centerMotor.setPercentOutput(centerPower)
+        frontMotor.setPercentOutput(centerPower)
+        centerMotor.setPercentOutput(frontPower)
         println("Intake starting")
         OI.driverController.rumble = 0.5
 //        intaking = true
