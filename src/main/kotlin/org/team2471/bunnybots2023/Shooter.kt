@@ -78,7 +78,7 @@ object Shooter : Subsystem("Shooter") {
                 rpmEntry.setDouble(rpm)
                 rpmSetpointEntry.setDouble(rpmSetpoint)
                 if (DriverStation.isEnabled() && ballReady) {
-                    OI.operatorController.rumble = 0.5
+                    OI.operatorController.rumble = 0.25
                 }
             }
         }

@@ -23,6 +23,7 @@ object Intake : Subsystem("Intake") {
     val intakingEntry = table.getEntry("Intaking")
     val ballLoadedEntry = table.getEntry("Ball Loaded")
     val disableConveyorEntry = table.getEntry("Disabled Conveyor")
+    val conveyorCurrentEntry = table.getEntry("Conveyor Current")
 
 
     val frontMotor = MotorController(TalonID(Talons.INTAKE_FRONT))
@@ -85,6 +86,7 @@ object Intake : Subsystem("Intake") {
                 intakingEntry.setBoolean(intaking)
                 ballLoadedEntry.setBoolean(ballLoaded)
                 disableConveyorEntry.setBoolean(disableConveyor)
+                conveyorCurrentEntry.setDouble(conveyorMotor.current)
 //                println("low ${lowSensor.get()}")
                 pneumaticHub.enableCompressorDigital()
             }
