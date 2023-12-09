@@ -50,8 +50,8 @@ suspend fun holdToSpit() = use(Intake, Shooter) {
         if (!OI.driverController.leftBumper) {
             this.stop()
         }
-        Intake.centerMotor.setPercentOutput(-1.0)
-        Intake.frontMotor.setPercentOutput(-1.0)
+        Intake.centerMotor.setPercentOutput(-0.4)
+        Intake.frontMotor.setPercentOutput(-0.5)
         Intake.conveyorMotor.setPercentOutput(-1.0)
         Shooter.uptakeMotor.setPercentOutput(-1.0)
     }
