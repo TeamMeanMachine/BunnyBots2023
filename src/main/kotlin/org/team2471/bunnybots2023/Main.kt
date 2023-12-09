@@ -97,6 +97,7 @@ object Robot : MeanlibRobot() {
         println("telop begin")
         Drive.aimPDController = Drive.teleopPDController
         Drive.headingSetpoint = Drive.heading
+//        Drive.coastMode()
     }
 
 //    val testMap : Map<String, () -> Unit> = mapOf(

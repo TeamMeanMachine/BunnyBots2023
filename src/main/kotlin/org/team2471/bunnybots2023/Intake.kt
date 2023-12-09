@@ -61,11 +61,11 @@ object Intake : Subsystem("Intake") {
 //           coastMode()
         }
         centerMotor.config {
-            currentLimit(10, 15, 0)
+            currentLimit(10, 10, 0)
 //            coastMode()
         }
         conveyorMotor.config {
-            currentLimit(25, 30, 0)
+            currentLimit(10, 15, 0)
             brakeMode()
         }
 

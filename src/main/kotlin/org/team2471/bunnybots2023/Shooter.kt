@@ -46,17 +46,17 @@ object Shooter : Subsystem("Shooter") {
     var rpmSetpoint: Double = 0.0
         set(value) { field = value }
     val shooterIdlePower: Double
-        get() = shooterIdleEntry.getDouble(0.85).coerceIn(0.0, 1.0)
+        get() = 1.0//shooterIdleEntry.getDouble(0.85).coerceIn(0.0, 1.0)
 
     init {
 
         uptakeMotor.config {
-            currentLimit(20, 30, 0)
+            currentLimit(20, 25, 0)
             inverted(true)
             brakeMode()
         }
         shooterMotor.config {
-            currentLimit(30, 40, 0)
+            currentLimit(15, 20, 0)
             inverted(true)
             coastMode()
             followersInverted(false) //DO NOT MAKE THIS VALUE TRUE
