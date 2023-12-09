@@ -65,6 +65,7 @@ object OI : Subsystem("OI") {
         driverController::leftBumper.whenTrue { holdToSpit() }
         driverController::y.whenTrue { Intake.intakeUp()}
         driverController::a.whenTrue { Intake.intakeDown()}
+        ({ driverController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }
 
 
 
