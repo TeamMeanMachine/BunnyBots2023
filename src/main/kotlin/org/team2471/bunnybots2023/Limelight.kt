@@ -1,20 +1,32 @@
 package org.team2471.bunnybots2023
 
+import edu.wpi.first.networktables.NetworkTableEntry
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.bucketWidth
+import org.team2471.bunnybots2023.Limelight.vAngleEntry
+import org.team2471.bunnybots2023.Limelight.vBotCentCoordsXEntry
+import org.team2471.bunnybots2023.Limelight.vBotCentCoordsYEntry
+import org.team2471.bunnybots2023.Limelight.vMax
+import org.team2471.bunnybots2023.Limelight.vMin
 import org.team2471.frc.lib.coroutines.MeanlibDispatcher
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.math.Vector2
 import org.team2471.frc.lib.units.*
-import kotlin.math.atan2
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
     private val validTargetsEntry = datatable.getEntry("tv")
     private val ledModeEntry = datatable.getEntry("ledMode")
+
+    private val table = NetworkTableInstance.getDefault().getTable("Limelight")
+    val vBotCentCoordsXEntry: NetworkTableEntry = table.getEntry("vBotCentCoords X")
+    val vBotCentCoordsYEntry: NetworkTableEntry = table.getEntry("vBotCentCoords Y")
+    val vAngleEntry: NetworkTableEntry = table.getEntry("vAngle")
+//    val vBotCentCoordsXEntry: NetworkTableEntry = table.getEntry("vBotCentCoords X")
+//    val vBotCentCoordsYEntry: NetworkTableEntry = table.getEntry("vBotCentCoords Y")
 
 
     private const val lengthHeightMinRatio = 2.5
@@ -22,6 +34,8 @@ object Limelight : Subsystem("Limelight") {
     const val limelightScreenWidth = 320
     const val limelightScreenHeight = 320
     const val bucketWidth = 10 + 2/8 // Inches
+    const val vMax = 20.0 /* feet per second */ /50.0
+    const val vMin = 2.0 /* feet per second */ /50.0
 
     var enemyBuckets : List<BucketTarget> = arrayListOf<BucketTarget>()
 
@@ -48,6 +62,7 @@ object Limelight : Subsystem("Limelight") {
                     }
                     if (prevEnemyBuckets.isNotEmpty() && enemyBuckets.isNotEmpty()) {
                         enemyBuckets[0].prevTarget = prevEnemyBuckets[0]
+//                        println(enemyBuckets[0].botCentCoords)
                     }
 //                    println(enemyBuckets[0].prevTarget)
                 }
@@ -167,30 +182,42 @@ data class BucketTarget (
     val x: Double,
     val y: Double,
     val pixelWidth: Double,
-    var prevTarget: BucketTarget? = null
 ) {
+    var prevTarget: BucketTarget? = null
+        set(value) {
+            if (value != null) {
+                vBotCentCoords = botCentCoords - value.botCentCoords
+                vBotCentCoordsXEntry.setDouble(vBotCentCoords.times(50.0).x)
+                vBotCentCoordsYEntry.setDouble(vBotCentCoords.times(50.0).y)
+                vAngle = angle - value.angle
+                vAngleEntry.setDouble(vAngle.asDegrees * 50)
+//                println("VANGLE!!!! :$vAngle")
+            } else {
+//                println("Oh No!")
+            }
+            field = value
+        }
     val angle = Limelight.limelightAngle + Angle.atan(x * (29.8).degrees.tan())
     val angleWidth = Angle.atan(pixelWidth * (29.8).degrees.tan())
     val dist = ((bucketWidth / 2) / (angleWidth / 2.0).tan()).feet
-    val botCentCoords = Vector2((angle.sin()/dist.asFeet), (angle.cos()/dist.asFeet))
+    val botCentCoords = Vector2((angle.sin()*dist.asFeet), (angle.cos()*dist.asFeet))
     var vBotCentCoords = Vector2(0.0, 0.0)
     var vAngle = 0.0.degrees
 
-    init {
-
-
-        if (prevTarget != null){
-            vBotCentCoords = botCentCoords - prevTarget!!.botCentCoords
-            vAngle = angle - prevTarget!!.angle
-
-        } else {
-//            println("Oh No!")
-        }
-    }
-
     fun pBotCentCoords(ticks: Int): Vector2{
 
-        return botCentCoords + (vBotCentCoords.times(ticks.toDouble()))
+        if (vBotCentCoords.length in vMin..vMax){
+//            println(vBotCentCoords.times(ticks.toDouble()))
+            println("${botCentCoords.round(2)} + ${(vBotCentCoords * ticks.toDouble()).round(2)} = ${(botCentCoords + (vBotCentCoords * ticks.toDouble())).round(2)}")
+            return botCentCoords + (vBotCentCoords * ticks.toDouble())
+        }
+        else{
+
+//            println("Oh nooooo!${vBotCentCoords.length * 50}")
+            return botCentCoords
+        }
+
+//        return botCentCoords + (vBotCentCoords.times(ticks.toDouble()))
     }
 
     fun pAngle(ticks: Int): Angle{

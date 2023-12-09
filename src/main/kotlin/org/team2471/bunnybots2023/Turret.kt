@@ -167,7 +167,8 @@ object Turret : Subsystem("Turret") {
     }
 
     fun aimAtBucket(target : BucketTarget){
-        turretSetpoint = target.pAngle(10)
+        turretSetpoint = target.pBotCentCoords(50).angle
+        println()
 //        println(target.vAngle)
     }
 
