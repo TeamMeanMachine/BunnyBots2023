@@ -20,6 +20,7 @@ object Intake : Subsystem("Intake") {
     val centerPowerEntry = table.getEntry("Center Power")
     val frontMotorCurrentEntry = table.getEntry("Front Current")
     val centerMotorCurrentEntry = table.getEntry("Center Current")
+    val conveyorMotorCurrentEntry = table.getEntry("Conveyor Current")
     val intakingEntry = table.getEntry("Intaking")
     val ballLoadedEntry = table.getEntry("Ball Loaded")
     val disableConveyorEntry = table.getEntry("Disabled Conveyor")
@@ -66,7 +67,7 @@ object Intake : Subsystem("Intake") {
 //            coastMode()
         }
         conveyorMotor.config {
-            currentLimit(10, 15, 0)
+            currentLimit(10, 0, 0)
             brakeMode()
         }
 
@@ -84,6 +85,7 @@ object Intake : Subsystem("Intake") {
                 isDownEntry.setBoolean(isDown)
                 frontMotorCurrentEntry.setDouble(frontMotor.current)
                 centerMotorCurrentEntry.setDouble(centerMotor.current)
+                conveyorMotorCurrentEntry.setDouble(conveyorMotor.current)
                 intakingEntry.setBoolean(intaking)
                 ballLoadedEntry.setBoolean(ballLoaded)
                 disableConveyorEntry.setBoolean(disableConveyor)

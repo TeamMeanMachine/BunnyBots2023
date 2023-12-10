@@ -24,7 +24,6 @@ object Shooter : Subsystem("Shooter") {
     val rpmSetpointEntry = table.getEntry("RPM Setpoint")
     val shooterIdleEntry = table.getEntry("Shooter Idle Power")
 
-
     val shooterMotor = MotorController(TalonID(Talons.SHOOTER_ONE), TalonID(Talons.SHOOTER_TWO))
 //    val shooterMotorTwo = MotorController(TalonID(Talons.SHOOTER_TWO))
 //    val shooterEncoder = AnalogInput(AnalogSensors.SHOOTER_ENCODER)
@@ -51,7 +50,7 @@ object Shooter : Subsystem("Shooter") {
     init {
 
         uptakeMotor.config {
-            currentLimit(20, 25, 0)
+            currentLimit(20, 0, 0)
             inverted(true)
             brakeMode()
         }
