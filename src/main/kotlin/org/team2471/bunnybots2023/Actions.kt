@@ -27,6 +27,7 @@ suspend fun fire() = use(Shooter) {
             this.stop()
         }
         previousCurrent = Shooter.shooterMotor.current
+        Shooter.timeAfterLastShot = 0.0
 
     }
     Shooter.uptakeMotor.setPercentOutput(1.0)
@@ -43,6 +44,7 @@ suspend fun holdFire() = use(Shooter) {
             this.stop()
         }
     }
+    Shooter.timeAfterLastShot = 0.0
     Shooter.reverseBall = false
     Intake.ballPast = ballWasLoaded
 }

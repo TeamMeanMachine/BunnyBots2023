@@ -19,10 +19,8 @@ object Shooter : Subsystem("Shooter") {
     val uptakeCurrentEntry = table.getEntry("Uptake Current")
     val disableUptakeEntry = table.getEntry("Disabled Uptake")
     val shooterCurrentEntry = table.getEntry("Shooter Current")
-    val shooterTwoCurrentEntry = table.getEntry("Shooter Two Current")
-    val rpmEntry = table.getEntry("RPM")
-    val rpmSetpointEntry = table.getEntry("RPM Setpoint")
     val shooterIdleEntry = table.getEntry("Shooter Idle Power")
+    val timeAfterLastShotEntry = table.getEntry("Time After Last Shot")
 
     val shooterMotor = MotorController(TalonID(Talons.SHOOTER_ONE), TalonID(Talons.SHOOTER_TWO))
 //    val shooterMotorTwo = MotorController(TalonID(Talons.SHOOTER_TWO))
@@ -38,12 +36,10 @@ object Shooter : Subsystem("Shooter") {
     var disableUptake = false
     var detectedBall = false
     var reverseBall = false
+    var timeAfterLastShot = 1.0
+        get() = field + DriverStation.getMatchTime()
+        set(value) { field = DriverStation.getMatchTime() + value }
 
-
-    val rpm: Double
-        get() = 0.0
-    var rpmSetpoint: Double = 0.0
-        set(value) { field = value }
     val shooterIdlePower: Double
         get() = 1.0//shooterIdleEntry.getDouble(0.85).coerceIn(0.0, 1.0)
 
@@ -74,9 +70,8 @@ object Shooter : Subsystem("Shooter") {
                 uptakeCurrentEntry.setDouble(uptakeMotor.current)
                 disableUptakeEntry.setBoolean(disableUptake)
                 shooterCurrentEntry.setDouble(shooterMotor.current)
-                rpmEntry.setDouble(rpm)
-                rpmSetpointEntry.setDouble(rpmSetpoint)
-                if (DriverStation.isEnabled() && ballReady && Limelight.seesTargets) {
+                timeAfterLastShotEntry.setDouble(timeAfterLastShot)
+                if (DriverStation.isEnabled() && ballReady && Limelight.seesTargets && timeAfterLastShot > 1.0) {
                     OI.operatorController.rumble = 0.25
                 } else {
                     OI.operatorController.rumble = 0.0
