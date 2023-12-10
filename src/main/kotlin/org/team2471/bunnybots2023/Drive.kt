@@ -56,6 +56,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     val driveMotor2CurrentEntry = table.getEntry("Drive Current 2")
     val driveMotor3CurrentEntry = table.getEntry("Drive Current 3")
 
+    val totalDriveCurretEntry = table.getEntry("Total Drive Current")
+    val totalTurnCurrentEntry = table.getEntry("Total Turn Current")
+
 
     val useGyroEntry = table.getEntry("Use Gyro")
 
@@ -208,6 +211,16 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 driveMotor2CurrentEntry.setDouble((modules[2] as Module).driveCurrent)
                 driveMotor3CurrentEntry.setDouble((modules[3] as Module).driveCurrent)
 
+                var totalDriveCurrent = 0.0
+                for (i in modules) {
+                    totalDriveCurrent += (i as Module).driveCurrent
+                }
+                totalDriveCurretEntry.setDouble(totalDriveCurrent)
+                var totalTurnCurrent = 0.0
+                for (i in modules) {
+                    totalTurnCurrent += (i as Module).turnMotor.current
+                }
+                totalTurnCurrentEntry.setDouble(totalTurnCurrent)
             }
         }
     }
@@ -374,7 +387,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 coastMode()
                 println("Absolute Angle: ${absoluteAngle.asDegrees}")
                 setRawOffsetConfig(absoluteAngle.asDegrees)
-                currentLimit(15, 20, 1)
+                currentLimit(12, 16, 1)
                 pid {
                     p(0.0002)
 //                    d(0.0000025)
@@ -385,7 +398,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 //                    wheel diam / 12 in per foot * pi / ticks / gear ratio
                 feedbackCoefficient = 3.0 / 12.0 * Math.PI / 42.0 / 4.71
                 currentLimit(25, 30, 1)
-//                openLoopRamp(0.2)
+                openLoopRamp(0.2)
             }
             GlobalScope.launch {
                 periodic {

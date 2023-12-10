@@ -60,7 +60,7 @@ object OI : Subsystem("OI") {
             Drive.initializeSteeringMotors()
         }
         driverController::x.whenTrue { Drive.xPose() }
-        driverController::rightBumper.whenTrue { Intake.toggleIntake() }
+        driverController::rightBumper.whenTrue { holdToIntake() }
         driverController::b.whenTrue { toggleBallCollection() }
         driverController::leftBumper.whenTrue { holdToSpit() }
         driverController::y.whenTrue { Intake.intakeUp()}
@@ -69,7 +69,7 @@ object OI : Subsystem("OI") {
 
 
 
-        operatorController::rightTriggerFullPress.whenTrue { fire() }
+        operatorController::rightTriggerFullPress.whenTrue { holdFire() }
         operatorController::b.whenTrue { toggleBallCollection() }
         operatorController::back.whenTrue { Turret.zeroTurret() }
         ({ operatorController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }

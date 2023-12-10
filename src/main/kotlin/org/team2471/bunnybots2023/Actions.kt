@@ -34,6 +34,18 @@ suspend fun fire() = use(Shooter) {
     Shooter.reverseBall = false
     Intake.ballPast = ballWasLoaded
 }
+suspend fun holdFire() = use(Shooter) {
+    Shooter.shooterMotor.setPercentOutput(1.0)
+    Shooter.uptakeMotor.setPercentOutput(1.0)
+    val ballWasLoaded = Intake.detectedBall
+    periodic {
+        if (!OI.operatorController.rightTriggerFullPress) {
+            this.stop()
+        }
+    }
+    Shooter.reverseBall = false
+    Intake.ballPast = ballWasLoaded
+}
 suspend fun toggleBallCollection() = use(Shooter, Intake) {
     if (Shooter.disableUptake) {
         Shooter.disableUptake = false
@@ -61,4 +73,14 @@ suspend fun holdToSpit() = use(Intake, Shooter) {
     } else {
         Intake.stopIntake()
     }
+}
+
+suspend fun holdToIntake() = use(Intake) {
+    periodic {
+        if (!OI.driverController.rightBumper) {
+            this.stop()
+        }
+        Intake.startIntake()
+    }
+    Intake.stopIntake()
 }
