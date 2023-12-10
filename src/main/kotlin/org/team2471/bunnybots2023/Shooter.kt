@@ -76,8 +76,10 @@ object Shooter : Subsystem("Shooter") {
                 shooterCurrentEntry.setDouble(shooterMotor.current)
                 rpmEntry.setDouble(rpm)
                 rpmSetpointEntry.setDouble(rpmSetpoint)
-                if (DriverStation.isEnabled() && ballReady) {
+                if (DriverStation.isEnabled() && ballReady && Limelight.seesTargets) {
                     OI.operatorController.rumble = 0.25
+                } else {
+                    OI.operatorController.rumble = 0.0
                 }
             }
         }
@@ -95,23 +97,18 @@ object Shooter : Subsystem("Shooter") {
         t.start()
         periodic(period = 0.005) {
             if (!disableUptake) {
-
                 if (ballReady) {
                     uptakeMotor.setPercentOutput(0.0)
                     Intake.ballPast = false
+                    waitTime = t.get()
                 } else if (Intake.ballPast) {
                     uptakeMotor.setPercentOutput(1.0)
-                } else {
+                } else if (t.get() - waitTime > 1.2){
                     uptakeMotor.setPercentOutput(0.0)
+                } else {
+                    uptakeMotor.setPercentOutput(1.0)
                 }
 
-                if (ballReady) {
-                    shooterMotor.setPercentOutput(shooterIdlePower)
-                    waitTime = t.get()
-                } else if (t.get() - waitTime > 2.0) {
-//                    shooterMotorOne.setPercentOutput(0.0)
-//                    shooterMotorTwo.setPercentOutput(0.0)
-                }
             } else {
                 uptakeMotor.setPercentOutput(0.0)
                 shooterMotor.setPercentOutput(0.0)

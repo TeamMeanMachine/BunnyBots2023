@@ -10,7 +10,6 @@ import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.degrees
 import org.team2471.frc.lib.units.feet
-import org.team2471.frc.lib.units.inches
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
@@ -48,7 +47,7 @@ object Limelight : Subsystem("Limelight") {
                     }
                 }
 
-
+                validTargetsEntry.setBoolean(seesTargets)
             }
         }
     }
@@ -66,8 +65,8 @@ object Limelight : Subsystem("Limelight") {
         return this - Drive.heading
     }
 
-    val validTargets: Boolean
-        get() = validTargetsEntry.getDouble(0.0) == 1.0
+    val seesTargets: Boolean
+        get() = enemyBuckets.isNotEmpty()
 
     // gets a bucket in field-centric bounds
     fun getBucketInBounds(upperBound: Angle, lowerBound: Angle) : BucketTarget? {
