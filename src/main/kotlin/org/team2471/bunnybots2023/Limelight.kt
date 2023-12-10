@@ -186,7 +186,6 @@ data class BucketTarget (
     var prevTarget: BucketTarget? = null
         set(value) {
             if (value != null) {
-                vBotCentCoords = botCentCoords - value.botCentCoords
                 vBotCentCoordsXEntry.setDouble(vBotCentCoords.times(50.0).x)
                 vBotCentCoordsYEntry.setDouble(vBotCentCoords.times(50.0).y)
                 vAngle = angle - value.angle
@@ -201,7 +200,8 @@ data class BucketTarget (
     val angleWidth = Angle.atan(pixelWidth * (29.8).degrees.tan())
     val dist = ((bucketWidth / 2) / (angleWidth / 2.0).tan()).feet
     val botCentCoords = Vector2((angle.sin()*dist.asFeet), (angle.cos()*dist.asFeet))
-    var vBotCentCoords = Vector2(0.0, 0.0)
+    val vBotCentCoords: Vector2
+        get() = botCentCoords - (prevTarget?.botCentCoords ?: botCentCoords)
     var vAngle = 0.0.degrees
 
     fun pBotCentCoords(ticks: Int): Vector2{
