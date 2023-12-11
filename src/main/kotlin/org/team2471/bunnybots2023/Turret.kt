@@ -140,6 +140,7 @@ object Turret : Subsystem("Turret") {
 
                 if (target != null) {
                     aimAtBucket(target)
+
                 } else {
                     turretSetpoint = joystickTarget
                 }

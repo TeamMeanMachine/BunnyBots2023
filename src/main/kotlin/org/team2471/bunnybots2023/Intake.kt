@@ -100,7 +100,10 @@ object Intake : Subsystem("Intake") {
         frontMotor.setPercentOutput(centerPower)
         centerMotor.setPercentOutput(frontPower)
         println("Intake starting")
-        OI.driverController.rumble = 0.5
+        if (!DriverStation.isAutonomous()) {
+            OI.driverController.rumble = 0.5
+        }
+
 //        intaking = true
     }
     fun stopIntake() {

@@ -59,6 +59,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     val totalDriveCurretEntry = table.getEntry("Total Drive Current")
     val totalTurnCurrentEntry = table.getEntry("Total Turn Current")
 
+    val positionXEntry = table.getEntry("Position X")
+    val positionYEntry = table.getEntry("Position Y")
+
 
     val useGyroEntry = table.getEntry("Use Gyro")
 
@@ -75,7 +78,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             MotorController(SparkMaxID(Sparks.FRONT_LEFT_DRIVE)),
             MotorController(SparkMaxID(Sparks.FRONT_LEFT_STEER)),
             Vector2(-13.1, 13.1),
-            Preferences.getDouble("Angle Offset 0",-262.49).degrees,
+            Preferences.getDouble("Angle Offset 0",-259.95).degrees,
             DigitalSensors.FRONT_LEFT,
             odometer0Entry,
             0
@@ -211,6 +214,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
                 driveMotor2CurrentEntry.setDouble((modules[2] as Module).driveCurrent)
                 driveMotor3CurrentEntry.setDouble((modules[3] as Module).driveCurrent)
 
+                positionXEntry.setDouble(position.x)
+                positionYEntry.setDouble(position.y)
+
                 var totalDriveCurrent = 0.0
                 for (i in modules) {
                     totalDriveCurrent += (i as Module).driveCurrent
@@ -226,7 +232,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     }
 
     override fun preEnable() {
-        //initializeSteeringMotors()
+        initializeSteeringMotors()
         odometer0Entry.setDouble(Preferences.getDouble("odometer 0",0.0))
         odometer1Entry.setDouble(Preferences.getDouble("odometer 1",0.0))
         odometer2Entry.setDouble(Preferences.getDouble("odometer 2",0.0))
@@ -275,7 +281,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         for (moduleCount in 0..3) { //changed to modules.indices, untested
             val module = (modules[moduleCount] as Module)
             module.turnMotor.setRawOffset(module.absoluteAngle.asDegrees)
-            println("Module: $moduleCount analogAngle: ${module.absoluteAngle}")
+            println("Module: $moduleCount analogAngle: ${module.absoluteAngle} id: ${module.driveMotor.motorID}")
         }
     }
 

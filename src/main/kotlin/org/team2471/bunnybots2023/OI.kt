@@ -22,7 +22,7 @@ object OI : Subsystem("OI") {
         get() = driverController.leftThumbstickY.deadband(deadBandDriver).squareWithSign()
 
     val driveTranslation: Vector2
-        get() = Vector2(driveTranslationX, -driveTranslationY) //does owen want this cubed?
+        get() = Vector2(driveTranslationX, driveTranslationY) //does owen want this cubed?
 
     val driveRotation: Double
         get() = (driverController.rightThumbstickX.deadband(deadBandDriver)).cube() // * 0.6
@@ -56,7 +56,7 @@ object OI : Subsystem("OI") {
 
     init {
         driverController::back.whenTrue {
-            Drive.zeroGyro()
+            Drive.zeroGyro();
             Drive.initializeSteeringMotors()
         }
         driverController::x.whenTrue { Drive.xPose() }

@@ -5,8 +5,9 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
-import org.team2471.frc.lib.coroutines.delay
-import org.team2471.frc.lib.coroutines.parallel
+//import org.team2471.frc.lib.coroutines.delay
+//import org.team2471.frc.lib.coroutines.parallel
+import org.team2471.frc.lib.coroutines.periodic
 //import org.team2471.bunnybots2022.Drive
 import org.team2471.frc.lib.framework.use
 import org.team2471.frc.lib.math.Vector2
@@ -16,6 +17,7 @@ import org.team2471.frc.lib.motion_profiling.Autonomi
 import org.team2471.frc.lib.units.Angle
 import org.team2471.frc.lib.units.asFeet
 import org.team2471.frc.lib.units.degrees
+import org.team2471.frc.lib.util.Timer
 import org.team2471.frc.lib.util.measureTimeFPGA
 import java.io.File
 import java.util.*
@@ -74,6 +76,7 @@ object AutoChooser {
         addOption("Outer Two Auto", "outerTwoAuto")
         addOption("Inner Three Auto", "innerThreeAuto")
         addOption("NodeDeck", "nodeDeck")
+        addOption("bunnyBot2023", "bunnyBot2023")
 
     }
 
@@ -110,33 +113,53 @@ object AutoChooser {
                 NetworkTableEvent.Kind.kValueAll
             )
         ) { event ->
-            println("Automous change detected")
-            val json = event.valueData.value.string
-            if (json.isNotEmpty()) {
-                val t = measureTimeFPGA {
-                    autonomi = Autonomi.fromJsonString(json) ?: Autonomi()
-                }
-                println("Loaded autonomi in $t seconds")
-                if (cacheFile != null) {
-                    println("CacheFile != null. Hi.")
-                    cacheFile!!.writeText(json)
+            println("Autonomous change detected")
+            if (event.valueData != null) {
+                val json = event.valueData.value.string
+                if (json.isNotEmpty()) {
+                    val t = measureTimeFPGA {
+                        autonomi = Autonomi.fromJsonString(json) ?: Autonomi()
+                    }
+                    println("Loaded autonomi in $t seconds")
+                    if (cacheFile != null) {
+                        println("CacheFile != null. Hi.")
+                        cacheFile!!.writeText(json)
+                    } else {
+                        println("cacheFile == null. Hi.")
+                    }
+                    println("New autonomi written to cache")
                 } else {
-                    println("cacheFile == null. Hi.")
+                    autonomi = Autonomi()
+                    DriverStation.reportWarning("Empty autonomi received from network tables", false)
                 }
-                println("New autonomi written to cache")
-            } else {
-                autonomi = Autonomi()
-                DriverStation.reportWarning("Empty autonomi received from network tables", false)
             }
         }
     }
 
+    private suspend fun bunnyBot2023() {
+        Drive.initializeSteeringMotors()
+        Drive.zeroGyro()
+        val testAutonomous = autonomi["BunnyBot2023"]
+        val path = testAutonomous?.get("AutoBunnyBot")
+        if (path != null) {
+            Drive.driveAlongPath(path, true)
+        } else {
+            println("BUNNYBOTS PATH IS NULL!!!!!!!!")
+        }
+
+        var numberBalls : Int = 5
+
+        // drive, shoot, intake, intake motors, limeLight
+
+
+    }
     suspend fun autonomous() = use(Drive, name = "Autonomous") {
         println("Got into Auto fun autonomous. Hi. 888888888888888 ${Robot.recentTimeTaken()}")
         SmartDashboard.putString("autoStatus", "init")
         println("Selected Auto = *****************   $selAuto ****************************  ${Robot.recentTimeTaken()}")
         when (selAuto) {
             "Tests" -> testAuto()
+            "bunnyBot2023" -> bunnyBot2023()
             else -> println("No function found for ---->$selAuto<-----  ${Robot.recentTimeTaken()}")
         }
         SmartDashboard.putString("autoStatus", "complete")
@@ -155,4 +178,9 @@ object AutoChooser {
         }
     }
 
+
+
+
 }
+
+

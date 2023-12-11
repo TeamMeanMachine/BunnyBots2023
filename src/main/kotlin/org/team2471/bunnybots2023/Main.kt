@@ -7,11 +7,12 @@ import edu.wpi.first.wpilibj.RobotBase
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.DelicateCoroutinesApi
+import org.team2471.bunnybots2023.testing.driveTests
+import org.team2471.bunnybots2023.testing.steeringTests
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.MeanlibRobot
 import org.team2471.frc.lib.motion.following.demoMode
 import org.team2471.frc.lib.units.degrees
-import org.team2471.bunnybots2023.testing.*
 import java.net.NetworkInterface
 
 
@@ -50,6 +51,7 @@ object Robot : MeanlibRobot() {
         println("Activating Turret! ${Turret.turretSetpoint}")
         Limelight
         println("Activating Limelight! ${Limelight.limelightAngle}")
+        Pixy
 //        Intake
 //        println("Activating Intake!")
         Shooter
@@ -75,6 +77,7 @@ object Robot : MeanlibRobot() {
         Shooter.enable()
         Turret.enable()
         Intake.enable()
+        Pixy.enable()
         println("field centric? ${SmartDashboard.getBoolean("Use Gyro", true) && !DriverStation.isAutonomous()}")
         println("ending enable")
     }
