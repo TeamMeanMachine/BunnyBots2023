@@ -5,7 +5,12 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.bucketWidth
+import org.team2471.bunnybots2023.Limelight.limeLightToTarget
+import org.team2471.bunnybots2023.Limelight.limelightScreenWidth
+import org.team2471.bunnybots2023.Limelight.limelightStaticAngle
+import org.team2471.bunnybots2023.Limelight.targetTopHeight
 import org.team2471.bunnybots2023.Limelight.vAngleEntry
+import org.team2471.bunnybots2023.Limelight.vBotCentCoordsLengthEntry
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsXEntry
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsYEntry
 import org.team2471.bunnybots2023.Limelight.vMax
@@ -15,6 +20,7 @@ import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
 import org.team2471.frc.lib.math.Vector2
 import org.team2471.frc.lib.units.*
+import org.team2471.frc.lib.units.Angle.Companion.tan
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
@@ -24,18 +30,27 @@ object Limelight : Subsystem("Limelight") {
     private val table = NetworkTableInstance.getDefault().getTable("Limelight")
     val vBotCentCoordsXEntry: NetworkTableEntry = table.getEntry("vBotCentCoords X")
     val vBotCentCoordsYEntry: NetworkTableEntry = table.getEntry("vBotCentCoords Y")
+    val vBotCentCoordsLengthEntry: NetworkTableEntry = table.getEntry("vBotCentCoords Length")
     val vAngleEntry: NetworkTableEntry = table.getEntry("vAngle")
-//    val vBotCentCoordsXEntry: NetworkTableEntry = table.getEntry("vBotCentCoords X")
-//    val vBotCentCoordsYEntry: NetworkTableEntry = table.getEntry("vBotCentCoords Y")
+    val botCentCoordsXEntry: NetworkTableEntry = table.getEntry("botCentCoords X")
+    val botCentCoordsYEntry: NetworkTableEntry = table.getEntry("botCentCoords Y")
+    val targetDistEntry: NetworkTableEntry = table.getEntry("Target Distance (Inches)")
 
+
+    val advantageBucketPose = table.getEntry("Advantage Bucket Pose")
 
     private const val lengthHeightMinRatio = 2.5
-    const val limelightHeight = 16 // inches
+    val limelightHeight = 32.inches
+    val targetElevation = 42.inches
+    val targetHeight = 15.inches
+    val targetTopHeight = targetElevation + targetHeight
+    val limeLightToTarget = targetTopHeight - limelightHeight
+    val limelightStaticAngle = 33.3.degrees
     const val limelightScreenWidth = 320
     const val limelightScreenHeight = 320
     const val bucketWidth = 10 + 2/8 // Inches
     const val vMax = 20.0 /* feet per second */ /50.0
-    const val vMin = 2.0 /* feet per second */ /50.0
+    const val vMin = 0.0 /* feet per second */ /50.0
 
     var enemyBuckets : List<BucketTarget> = arrayListOf<BucketTarget>()
 
@@ -62,11 +77,16 @@ object Limelight : Subsystem("Limelight") {
                     }
                     if (prevEnemyBuckets.isNotEmpty() && enemyBuckets.isNotEmpty()) {
                         enemyBuckets[0].prevTarget = prevEnemyBuckets[0]
+                        vBotCentCoordsLengthEntry.setDouble(enemyBuckets[0].vBotCentCoords.length * 50)
+                        botCentCoordsXEntry.setDouble(enemyBuckets[0].botCentCoords.x)
+                        botCentCoordsYEntry.setDouble(enemyBuckets[0].botCentCoords.y)
+                        targetDistEntry.setDouble(enemyBuckets[0].dist.asInches)
+                        println(Angle.atan(enemyBuckets[0].y * (22.85).degrees.tan()))
+
 //                        println(enemyBuckets[0].botCentCoords)
                     }
 //                    println(enemyBuckets[0].prevTarget)
                 }
-
 
             }
         }
@@ -80,8 +100,8 @@ object Limelight : Subsystem("Limelight") {
         return this - Drive.heading
     }
 
-    val validTargets: Boolean
-        get() = validTargetsEntry.getDouble(0.0) == 1.0
+    val seesTargets: Boolean
+        get() = enemyBuckets.isNotEmpty()
 
     // gets a bucket in field-centric bounds
     fun getBucketInBounds(upperBound: Angle, lowerBound: Angle) : BucketTarget? {
@@ -188,8 +208,6 @@ data class BucketTarget (
             if (value != null) {
                 vBotCentCoordsXEntry.setDouble(vBotCentCoords.times(50.0).x)
                 vBotCentCoordsYEntry.setDouble(vBotCentCoords.times(50.0).y)
-                vAngle = angle - value.angle
-                vAngleEntry.setDouble(vAngle.asDegrees * 50)
 //                println("VANGLE!!!! :$vAngle")
             } else {
 //                println("Oh No!")
@@ -197,30 +215,27 @@ data class BucketTarget (
             field = value
         }
     val angle = Limelight.limelightAngle + Angle.atan(x * (29.8).degrees.tan())
-    val angleWidth = Angle.atan(pixelWidth * (29.8).degrees.tan())
-    val dist = ((bucketWidth / 2) / (angleWidth / 2.0).tan()).feet
+    val vertAngle = limelightStaticAngle + Angle.atan(y * (22.85).degrees.tan())
+    val dist = limeLightToTarget / tan(vertAngle)
     val botCentCoords = Vector2((angle.sin()*dist.asFeet), (angle.cos()*dist.asFeet))
     val vBotCentCoords: Vector2
-        get() = botCentCoords - (prevTarget?.botCentCoords ?: botCentCoords)
-    var vAngle = 0.0.degrees
+        get() {
+            return botCentCoords - (prevTarget?.botCentCoords ?: botCentCoords)
+        }
 
     fun pBotCentCoords(ticks: Int): Vector2{
 
         if (vBotCentCoords.length in vMin..vMax){
 //            println(vBotCentCoords.times(ticks.toDouble()))
-            println("${botCentCoords.round(2)} + ${(vBotCentCoords * ticks.toDouble()).round(2)} = ${(botCentCoords + (vBotCentCoords * ticks.toDouble())).round(2)}")
+//            println("${botCentCoords.round(2)} + ${(vBotCentCoords * ticks.toDouble()).round(2)} = ${(botCentCoords + (vBotCentCoords * ticks.toDouble())).round(2)}")
             return botCentCoords + (vBotCentCoords * ticks.toDouble())
         }
         else{
 
-//            println("Oh nooooo!${vBotCentCoords.length * 50}")
+            println("Oh nooooo!${vBotCentCoords.length * 50}")
             return botCentCoords
         }
 
 //        return botCentCoords + (vBotCentCoords.times(ticks.toDouble()))
-    }
-
-    fun pAngle(ticks: Int): Angle{
-        return angle + vAngle.times(ticks.toDouble())
     }
 }

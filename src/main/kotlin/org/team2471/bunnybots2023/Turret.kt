@@ -6,6 +6,7 @@ import edu.wpi.first.wpilibj.AnalogInput
 import edu.wpi.first.wpilibj.DriverStation
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import org.team2471.bunnybots2023.Limelight.limelightAngle
 import org.team2471.bunnybots2023.Limelight.toFieldCentric
 import org.team2471.bunnybots2023.Limelight.toRobotCentric
 import org.team2471.frc.lib.actuators.FalconID
@@ -31,6 +32,7 @@ object Turret : Subsystem("Turret") {
     val robotTurretSetpointEntry = table.getEntry("Robot Centric Turret Setpoint")
     val turretEncoderAngleEntry = table.getEntry("Turret Encoder Angle")
     val encoderVoltageEntry = table.getEntry("Raw Encoder Voltage")
+    val pBotCentCoordsAngleEntry = table.getEntry("PredBotCentCoord Angle (50)")
 
     const val minJoystickDistance = 0.5
 
@@ -167,8 +169,9 @@ object Turret : Subsystem("Turret") {
     }
 
     fun aimAtBucket(target : BucketTarget){
-        turretSetpoint = target.pBotCentCoords(50).angle
-        println()
+        turretSetpoint = target.pBotCentCoords(20).angle
+//        println(angle - target.botCentCoords.angle)
+        pBotCentCoordsAngleEntry.setDouble(target.pBotCentCoords(20).angle.asDegrees)
 //        println(target.vAngle)
     }
 
