@@ -5,8 +5,10 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 //import org.team2471.frc.lib.coroutines.delay
-//import org.team2471.frc.lib.coroutines.parallel
+import org.team2471.frc.lib.coroutines.parallel
 import org.team2471.frc.lib.coroutines.periodic
 //import org.team2471.bunnybots2022.Drive
 import org.team2471.frc.lib.framework.use
@@ -14,10 +16,6 @@ import org.team2471.frc.lib.math.Vector2
 import org.team2471.frc.lib.motion.following.drive
 import org.team2471.frc.lib.motion.following.driveAlongPath
 import org.team2471.frc.lib.motion_profiling.Autonomi
-import org.team2471.frc.lib.units.Angle
-import org.team2471.frc.lib.units.asFeet
-import org.team2471.frc.lib.units.degrees
-import org.team2471.frc.lib.util.Timer
 import org.team2471.frc.lib.util.measureTimeFPGA
 import java.io.File
 import java.util.*
@@ -137,22 +135,52 @@ object AutoChooser {
     }
 
     private suspend fun bunnyBot2023() {
-        Drive.initializeSteeringMotors()
-        Drive.zeroGyro()
-        val testAutonomous = autonomi["BunnyBot2023"]
-        val path = testAutonomous?.get("AutoBunnyBot")
-        if (path != null) {
-            Drive.driveAlongPath(path, true)
-        } else {
-            println("BUNNYBOTS PATH IS NULL!!!!!!!!")
-        }
+        GlobalScope.launch {
+            Drive.initializeSteeringMotors()
+            Drive.zeroGyro()
+            val totePath = autonomi["BunnyBot2023"]?.get("MoveToTotes")
+            if (totePath != null) {
+                parallel({
+                    println("GONNA DRIVE NOWWWW")
+                    Drive.driveAlongPath(totePath, true)
+                }, {
+//                    periodic {
+//                        if (Limelight.seesTargets) {
+//                            println("i see target, aborting scout path")
+//                            Drive.abortPath()
+//                            this.stop()
+                        })
+//                    }
+//                    periodic {
+//                        if (Limelight.seesTargets) {
+//                            println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
+//                            Drive.drive(
+//                                Limelight.enemyBuckets[0].botCentCoords + Drive.position,
+//                                0.0,
+//                                true
+//                            )
+//                            turret shoot at target
+//                        } else {
+//                            Drive.drive(
+//                                Vector2(0.0, 0.0),
+//                                0.0,
+//                                false
+//                            )
+                            //turret turn until see
+                        }
+                    }
+                    //drive to target and shoot
+                }
 
-        var numberBalls : Int = 5
+//            } else {
+//                println("BUNNYBOTS PATH IS NULL!!!!!!!!")
+//            }
+
 
         // drive, shoot, intake, intake motors, limeLight
 
 
-    }
+//    }
     suspend fun autonomous() = use(Drive, name = "Autonomous") {
         println("Got into Auto fun autonomous. Hi. 888888888888888 ${Robot.recentTimeTaken()}")
         SmartDashboard.putString("autoStatus", "init")

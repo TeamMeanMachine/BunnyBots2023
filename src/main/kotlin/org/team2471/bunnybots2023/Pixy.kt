@@ -28,7 +28,7 @@ object Pixy : Subsystem("Pixy") {
     override suspend fun default() {
         periodic {
             if (pixy != null) {
-                println("pixy FPS: ${ pixy.fps }")
+//                println("pixy FPS: ${ pixy.fps }")
             }
         }
     }
