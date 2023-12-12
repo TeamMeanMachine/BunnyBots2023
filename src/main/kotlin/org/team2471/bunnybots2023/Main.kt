@@ -52,6 +52,7 @@ object Robot : MeanlibRobot() {
         Limelight
         println("Activating Limelight! ${Limelight.limelightAngle}")
         Pixy
+        println("Activating Pixy ${Pixy.screenHeight}")
 //        Intake
 //        println("Activating Intake!")
         Shooter

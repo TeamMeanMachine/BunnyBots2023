@@ -9,7 +9,6 @@ import org.team2471.bunnybots2023.Limelight.limeLightToTarget
 import org.team2471.bunnybots2023.Limelight.limelightScreenWidth
 import org.team2471.bunnybots2023.Limelight.limelightStaticAngle
 import org.team2471.bunnybots2023.Limelight.targetTopHeight
-import org.team2471.bunnybots2023.Limelight.vAngleEntry
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsLengthEntry
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsXEntry
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsYEntry
@@ -34,10 +33,11 @@ object Limelight : Subsystem("Limelight") {
     val vBotCentCoordsXEntry: NetworkTableEntry = table.getEntry("vBotCentCoords X")
     val vBotCentCoordsYEntry: NetworkTableEntry = table.getEntry("vBotCentCoords Y")
     val vBotCentCoordsLengthEntry: NetworkTableEntry = table.getEntry("vBotCentCoords Length")
-    val vAngleEntry: NetworkTableEntry = table.getEntry("vAngle")
+//    val vAngleEntry: NetworkTableEntry = table.getEntry("vAngle")
     val botCentCoordsXEntry: NetworkTableEntry = table.getEntry("botCentCoords X")
     val botCentCoordsYEntry: NetworkTableEntry = table.getEntry("botCentCoords Y")
     val targetDistEntry: NetworkTableEntry = table.getEntry("Target Distance (Inches)")
+    val targetAngleEntry: NetworkTableEntry = table.getEntry("Target Angle (Degrees)")
 
 
     val advantageBucketPose = table.getEntry("Advantage Bucket Pose")
@@ -45,7 +45,7 @@ object Limelight : Subsystem("Limelight") {
     private const val lengthHeightMinRatio = 2.5
     val limelightHeight = 32.inches
     val targetElevation = 42.inches
-    val targetHeight = 15.inches
+    val targetHeight = 12.inches
     val targetTopHeight = targetElevation + targetHeight
     val limeLightToTarget = targetTopHeight - limelightHeight
     val limelightStaticAngle = 33.3.degrees
@@ -84,7 +84,7 @@ object Limelight : Subsystem("Limelight") {
                         botCentCoordsXEntry.setDouble(enemyBuckets[0].botCentCoords.x)
                         botCentCoordsYEntry.setDouble(enemyBuckets[0].botCentCoords.y)
                         targetDistEntry.setDouble(enemyBuckets[0].dist.asInches)
-                        println(Angle.atan(enemyBuckets[0].y * (22.85).degrees.tan()))
+                        targetAngleEntry.setDouble(enemyBuckets[0].angle.asDegrees)
 
 //                        println(enemyBuckets[0].botCentCoords)
                     }
@@ -168,7 +168,8 @@ object Limelight : Subsystem("Limelight") {
                 longStripsColor[i] > 0,
                 datatable.getEntry("tx${longStrips[i]}").getDouble(0.0),
                 datatable.getEntry("ty${longStrips[i]}").getDouble(0.0),
-                datatable.getEntry("thor${longStrips[i]}").getDouble(0.0)
+                datatable.getEntry("thor${longStrips[i]}").getDouble(0.0),
+                datatable.getEntry("tvert${longStrips[i]}").getDouble(0.0)
             ))
         }
 //
@@ -206,6 +207,7 @@ data class BucketTarget (
     val x: Double,
     val y: Double,
     val pixelWidth: Double,
+    val pixelHeight: Double
 ) {
     var prevTarget: BucketTarget? = null
         set(value) {
@@ -219,8 +221,8 @@ data class BucketTarget (
             field = value
         }
     val angle = Limelight.limelightAngle + Angle.atan(x * (29.8).degrees.tan())
-    val vertAngle = limelightStaticAngle + Angle.atan(y * (22.85).degrees.tan())
-    val dist = limeLightToTarget / tan(vertAngle)
+    val vertTopAngle = limelightStaticAngle + Angle.atan((y /*+ (pixelHeight / 2)*/) * (22.85).degrees.tan())
+    val dist = limeLightToTarget / tan(vertTopAngle)
     val botCentCoords = Vector2((angle.sin()*dist.asFeet), (angle.cos()*dist.asFeet))
     val vBotCentCoords: Vector2
         get() {
