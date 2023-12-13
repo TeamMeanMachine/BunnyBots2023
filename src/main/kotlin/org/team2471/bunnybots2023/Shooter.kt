@@ -71,7 +71,7 @@ object Shooter : Subsystem("Shooter") {
                 disableUptakeEntry.setBoolean(disableUptake)
                 shooterCurrentEntry.setDouble(shooterMotor.current)
                 timeAfterLastShotEntry.setDouble(timeAfterLastShot)
-                if (DriverStation.isEnabled() && ballReady && Limelight.seesTargets && timeAfterLastShot > 1.0) {
+                if (DriverStation.isEnabled() && ballReady && Limelight.seesTargets/* && timeAfterLastShot > 1.0*/) {
                     OI.operatorController.rumble = 0.25
                 } else {
                     OI.operatorController.rumble = 0.0
@@ -98,11 +98,12 @@ object Shooter : Subsystem("Shooter") {
                     waitTime = t.get()
                 } else if (Intake.ballPast) {
                     uptakeMotor.setPercentOutput(1.0)
-                } else if (t.get() - waitTime > 1.2){
-                    uptakeMotor.setPercentOutput(0.0)
+                } else if (t.get() - waitTime > 1.2) {
+//                    uptakeMotor.setPercentOutput(0.0)
                 } else {
                     uptakeMotor.setPercentOutput(1.0)
                 }
+                shooterMotor.setPercentOutput(1.0)
 
             } else {
                 uptakeMotor.setPercentOutput(0.0)

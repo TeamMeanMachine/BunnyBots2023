@@ -33,7 +33,7 @@ object Pixy : Subsystem("Pixy") {
         periodic {
             if (pixy != null) {
                 val lowest = lowestBall()
-                println("x = ${lowest?.x} y = ${lowest?.y}" )
+//                println("x = ${lowest?.x} y = ${lowest?.y}" )
                 fpsEntry.setDouble(pixy.fps.toDouble())
             }
         }

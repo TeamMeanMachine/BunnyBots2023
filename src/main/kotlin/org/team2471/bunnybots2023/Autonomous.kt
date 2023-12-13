@@ -135,52 +135,55 @@ object AutoChooser {
     }
 
     private suspend fun bunnyBot2023() {
+        println("starting global scope")
         GlobalScope.launch {
+            println("inside global scopes")
             Drive.initializeSteeringMotors()
             Drive.zeroGyro()
             val totePath = autonomi["BunnyBot2023"]?.get("MoveToTotes")
             if (totePath != null) {
                 parallel({
-                    println("GONNA DRIVE NOWWWW")
+                    println("GONNA DRIVE NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
                     Drive.driveAlongPath(totePath, true)
                 }, {
-//                    periodic {
-//                        if (Limelight.seesTargets) {
-//                            println("i see target, aborting scout path")
-//                            Drive.abortPath()
-//                            this.stop()
-                        })
-//                    }
-//                    periodic {
-//                        if (Limelight.seesTargets) {
-//                            println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
+                    periodic {
+                        if (Limelight.seesTargets) {
+                            println("i see target, aborting scout path")
+                            Drive.abortPath()
+                            this.stop()
+                        }
+                    }
+                })
+                    periodic {
+                        if (Limelight.seesTargets) {
+                            println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
 //                            Drive.drive(
 //                                Limelight.enemyBuckets[0].botCentCoords + Drive.position,
 //                                0.0,
 //                                true
 //                            )
 //                            turret shoot at target
-//                        } else {
-//                            Drive.drive(
-//                                Vector2(0.0, 0.0),
-//                                0.0,
-//                                false
-//                            )
-                            //turret turn until see
+                        } else {
+                            Drive.drive(
+                                Vector2(0.0, 0.0),
+                                0.0,
+                                false
+                            )
+                //turret turn until see
                         }
                     }
-                    //drive to target and shoot
-                }
+                //drive to target and shoot
+//                }
 
-//            } else {
-//                println("BUNNYBOTS PATH IS NULL!!!!!!!!")
-//            }
+            } else {
+                println("BUNNYBOTS PATH IS NULL!!!!!!!!")
+            }
+        }
 
 
         // drive, shoot, intake, intake motors, limeLight
+    }
 
-
-//    }
     suspend fun autonomous() = use(Drive, name = "Autonomous") {
         println("Got into Auto fun autonomous. Hi. 888888888888888 ${Robot.recentTimeTaken()}")
         SmartDashboard.putString("autoStatus", "init")
