@@ -78,10 +78,6 @@ object AutoChooser {
 
     }
 
-    var numberOfObjects = 3
-    var chargeStation = false
-
-
     init {
 //        DriverStation.reportWarning("Starting auto init warning", false)
 //        DriverStation.reportError("Starting auto init error", false)         //            trying to get individual message in event log to get timestamp -- untested
@@ -134,7 +130,7 @@ object AutoChooser {
         }
     }
 
-    private suspend fun bunnyBot2023() {
+    private suspend fun bunnyBot2023() = use(Drive) {
         println("starting global scope")
         GlobalScope.launch {
             println("inside global scopes")
@@ -155,21 +151,28 @@ object AutoChooser {
                     }
                 })
                     periodic {
-                        if (Limelight.seesTargets) {
-                            println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
-                            Drive.drive(
-                                Limelight.enemyBuckets[0].botCentCoords + Drive.position,
-                                0.0,
-                                true
-                            )
+                        if (Robot.isAutonomous) {
+                            if (Limelight.seesTargets) {
+                                println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
+                                Drive.drive(
+                                    Limelight.enemyBuckets[0].botCentCoords,
+                                    0.0,
+                                    false
+                                )
+                                Shooter.uptakeMotor.setPercentOutput(1.0)
 //                            turret shoot at target
+                            } else {
+                                Drive.drive(
+                                    Vector2(0.0, 0.0),
+                                    0.0,
+                                    false
+                                )
+                                Shooter.uptakeMotor.setPercentOutput(0.0)
+                                println("i no see")
+                                //turret turn until see
+                            }
                         } else {
-                            Drive.drive(
-                                Vector2(0.0, 0.0),
-                                0.0,
-                                false
-                            )
-                //turret turn until see
+                            this.stop()
                         }
                     }
                 //drive to target and shoot
@@ -190,7 +193,7 @@ object AutoChooser {
         println("Selected Auto = *****************   $selAuto ****************************  ${Robot.recentTimeTaken()}")
         when (selAuto) {
             "Tests" -> testAuto()
-            "bunnyBot2023" -> bunnyBot2023()
+            "BunnyBot2023" -> bunnyBot2023()
             else -> println("No function found for ---->$selAuto<-----  ${Robot.recentTimeTaken()}")
         }
         SmartDashboard.putString("autoStatus", "complete")
