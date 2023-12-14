@@ -32,6 +32,7 @@ object Pixy : Subsystem("Pixy") {
     override suspend fun default() {
         periodic {
             if (pixy != null) {
+//                println("pixy FPS: ${ pixy.fps }")
                 val lowest = lowestBall()
 //                println("x = ${lowest?.x} y = ${lowest?.y}" )
                 fpsEntry.setDouble(pixy.fps.toDouble())

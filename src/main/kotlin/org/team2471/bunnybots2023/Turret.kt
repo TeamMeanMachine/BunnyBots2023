@@ -15,12 +15,11 @@ import org.team2471.frc.lib.coroutines.MeanlibDispatcher
 import org.team2471.frc.lib.coroutines.delay
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
-import org.team2471.frc.lib.units.Angle
-import org.team2471.frc.lib.units.degrees
-import org.team2471.frc.lib.units.radians
+import org.team2471.frc.lib.units.*
 import kotlin.math.abs
 import kotlin.math.absoluteValue
 import kotlin.math.atan2
+import kotlin.math.ceil
 
 object Turret : Subsystem("Turret") {
 
@@ -170,7 +169,10 @@ object Turret : Subsystem("Turret") {
     }
 
     fun aimAtBucket(target : BucketTarget){
-        turretSetpoint = target.pBotCentCoords(20).angle
+        val ticks = target.ticksToTarget
+
+//        println(ticks)
+        turretSetpoint = target.pBotCentCoords(10/*ticks.toInt()*/).angle
 //        println(angle - target.botCentCoords.angle)
         pBotCentCoordsAngleEntry.setDouble(target.pBotCentCoords(20).angle.asDegrees)
 //        println(target.vAngle)

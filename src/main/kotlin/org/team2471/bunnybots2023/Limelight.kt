@@ -23,6 +23,7 @@ import org.team2471.frc.lib.units.feet
 import org.team2471.frc.lib.math.Vector2
 import org.team2471.frc.lib.units.*
 import org.team2471.frc.lib.units.Angle.Companion.tan
+import kotlin.math.pow
 
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
@@ -53,7 +54,7 @@ object Limelight : Subsystem("Limelight") {
     const val limelightScreenHeight = 320
     const val bucketWidth = 10 + 2/8 // Inches
     const val vMax = 20.0 /* feet per second */ /50.0
-    const val vMin = 0.0 /* feet per second */ /50.0
+    const val vMin = 2.0 /* feet per second */ /50.0
 
     var enemyBuckets : List<BucketTarget> = arrayListOf<BucketTarget>()
 
@@ -85,6 +86,7 @@ object Limelight : Subsystem("Limelight") {
                         botCentCoordsYEntry.setDouble(enemyBuckets[0].botCentCoords.y)
                         targetDistEntry.setDouble(enemyBuckets[0].dist.asInches)
                         targetAngleEntry.setDouble(enemyBuckets[0].angle.asDegrees)
+//                        println(Angle.atan(enemyBuckets[0].y * (22.85).degrees.tan()))
 
 //                        println(enemyBuckets[0].botCentCoords)
                     }
@@ -229,6 +231,14 @@ data class BucketTarget (
             return botCentCoords - (prevTarget?.botCentCoords ?: botCentCoords)
         }
 
+
+    val ticksToTarget: Double //Given to you by desmos nonlinear regression!
+        get() {
+            var x = dist.asInches
+//            return 14.109 * kotlin.math.tan(0.013571 * x)
+            return (0.0000453727 * x.pow(3)) - (0.00233868 * x.pow(2)) + (0.229364 * x)
+        }
+
     fun pBotCentCoords(ticks: Int): Vector2{
 
         if (vBotCentCoords.length in vMin..vMax){
@@ -238,7 +248,7 @@ data class BucketTarget (
         }
         else{
 
-            println("Oh nooooo!${vBotCentCoords.length * 50}")
+//            println("Oh nooooo!${vBotCentCoords.length * 50}")
             return botCentCoords
         }
 
