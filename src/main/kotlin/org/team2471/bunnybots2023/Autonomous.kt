@@ -74,7 +74,7 @@ object AutoChooser {
         addOption("Outer Two Auto", "outerTwoAuto")
         addOption("Inner Three Auto", "innerThreeAuto")
         addOption("NodeDeck", "nodeDeck")
-        addOption("bunnyBot2023", "bunnyBot2023")
+        addOption("BunnyBot2023", "BunnyBot2023")
 
     }
 
@@ -157,11 +157,11 @@ object AutoChooser {
                     periodic {
                         if (Limelight.seesTargets) {
                             println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
-//                            Drive.drive(
-//                                Limelight.enemyBuckets[0].botCentCoords + Drive.position,
-//                                0.0,
-//                                true
-//                            )
+                            Drive.drive(
+                                Limelight.enemyBuckets[0].botCentCoords + Drive.position,
+                                0.0,
+                                true
+                            )
 //                            turret shoot at target
                         } else {
                             Drive.drive(

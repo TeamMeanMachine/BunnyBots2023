@@ -402,7 +402,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             driveMotor.config {
                 brakeMode()
                 //                    wheel diam / 12 in per foot * pi / ticks / gear ratio
-                feedbackCoefficient = 3.0 / 12.0 * Math.PI / 42.0 / 4.71
+                feedbackCoefficient = 3.0 / 12.0 * Math.PI / 42.0 / 5.5
                 currentLimit(25, 30, 1)
                 openLoopRamp(0.2)
             }
