@@ -172,9 +172,9 @@ object Turret : Subsystem("Turret") {
         val ticks = target.ticksToTarget
 
 //        println(ticks)
-        turretSetpoint = target.pBotCentCoords(10/*ticks.toInt()*/).angle
+        turretSetpoint = target.pBotCentCoords(ticks.toInt()).angle
 //        println(angle - target.botCentCoords.angle)
-        pBotCentCoordsAngleEntry.setDouble(target.pBotCentCoords(20).angle.asDegrees)
+//        pBotCentCoordsAngleEntry.setDouble(target.pBotCentCoords(20).angle.asDegrees)
 //        println(target.vAngle)
     }
 
