@@ -132,30 +132,37 @@ object AutoChooser {
 
     private suspend fun bunnyBot2023() = use(Drive) {
         println("starting global scope")
-        GlobalScope.launch {
             println("inside global scopes")
             Drive.initializeSteeringMotors()
             Drive.zeroGyro()
             val totePath = autonomi["BunnyBot2023"]?.get("MoveToTotes")
             if (totePath != null) {
-                parallel({
+//                val testAutonomous = autonomi["BunnyBot2023"]
+//                val path = testAutonomous?.get("MoveToTotes")
+//                if (path != null) {
+//                    Drive.driveAlongPath(path, true)
+//                }
+//                parallel({
                     println("GONNA DRIVE NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
                     Drive.driveAlongPath(totePath, true)
-                }, {
-                    periodic {
-                        if (Limelight.seesTargets) {
-                            println("i see target, aborting scout path")
-                            Drive.abortPath()
-                            this.stop()
-                        }
-                    }
-                })
+//                }, {
+//                    periodic {
+//                        if (Limelight.seesTargets) {
+//                            println("i see target, aborting scout path")
+//                            Drive.abortPath()
+//                            this.stop()
+//                        }
+//                    }
+//                })
+/*
                     periodic {
                         if (Robot.isAutonomous) {
                             if (Limelight.seesTargets) {
                                 println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
+
                                 Drive.drive(
-                                    Limelight.enemyBuckets[0].botCentCoords,
+                                    Vector2(Limelight.botCentFilterX.calculate(Limelight.enemyBuckets[0].botCentCoords.x),
+                                            Limelight.botCentFilterY.calculate(Limelight.enemyBuckets[0].botCentCoords.y)),
                                     0.0,
                                     false
                                 )
@@ -175,14 +182,13 @@ object AutoChooser {
                             this.stop()
                         }
                     }
+*/
                 //drive to target and shoot
 //                }
 
             } else {
                 println("BUNNYBOTS PATH IS NULL!!!!!!!!")
             }
-        }
-
 
         // drive, shoot, intake, intake motors, limeLight
     }

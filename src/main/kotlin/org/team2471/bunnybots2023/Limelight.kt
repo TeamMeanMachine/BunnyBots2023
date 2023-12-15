@@ -1,5 +1,6 @@
 package org.team2471.bunnybots2023
 
+import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.networktables.NetworkTableEntry
 import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
@@ -55,6 +56,8 @@ object Limelight : Subsystem("Limelight") {
     const val bucketWidth = 10 + 2/8 // Inches
     const val vMax = 20.0 /* feet per second */ /50.0
     const val vMin = 2.0 /* feet per second */ /50.0
+    val botCentFilterX = LinearFilter.movingAverage(5)
+    val botCentFilterY = LinearFilter.movingAverage(5)
 
     var enemyBuckets : List<BucketTarget> = arrayListOf<BucketTarget>()
 
