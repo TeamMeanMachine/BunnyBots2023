@@ -99,7 +99,7 @@ object Shooter : Subsystem("Shooter") {
                 } else if (Intake.ballPast) {
                     uptakeMotor.setPercentOutput(1.0)
                 } else if (t.get() - waitTime > 1.2) {
-//                    uptakeMotor.setPercentOutput(0.0)
+                    uptakeMotor.setPercentOutput(0.0)
                 } else {
                     uptakeMotor.setPercentOutput(1.0)
                 }

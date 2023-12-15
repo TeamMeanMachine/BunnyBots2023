@@ -23,8 +23,6 @@ object Pixy : Subsystem("Pixy") {
     const val screenHeight : Int = 255
     const val screenWidth : Int = 255
 
-
-
     init {
         initializePixy()
     }
@@ -47,19 +45,15 @@ object Pixy : Subsystem("Pixy") {
 
     fun lowestBall() : Block? { // returns x and y pos of lowest ball (closest ball) in pixels
         try {
-//            val count: Int = pixy.ccc.getBlocks(false, (Pixy2CCC.CCC_SIG1.toInt()), maxBlockCount)
-//            if (count == 0) {
-//                return null
-//            }
+            val errorCode: Int = pixy.ccc.getBlocks(false, (Pixy2CCC.CCC_SIG1.toInt()), maxBlockCount)
+            if (errorCode != 0) {
+                return null
+            }
 
-            var maxBlock : Block? = null
-            val blocks: ArrayList<Pixy2CCC.Block> = pixy.ccc.blockCache
-            maxBlock = blocks.maxByOrNull {it.y}
+            return pixy.ccc.blockCache.maxByOrNull {it.y}
 
-
-            return maxBlock // higher y coord = lower on screen so reverse it
         } catch (ex:java.lang.Exception) {
-            println("Pixy 2 exception ${ex.toString()}")
+            println("Pixy 2 exception $ex")
             return null
         }
     }

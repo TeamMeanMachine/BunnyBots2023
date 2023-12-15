@@ -254,7 +254,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
     fun zeroGyro() {
         heading = 0.0.degrees
         println("zeroed heading to $heading")//  alliance blue? ${AutoChooser.redSide}")
-        Turret.turretSetpoint = Turret.turretAngle.toFieldCentric()
+        Turret.rawTurretSetpoint = Turret.turretAngle.toFieldCentric()
     }
 
     override suspend fun default() {
