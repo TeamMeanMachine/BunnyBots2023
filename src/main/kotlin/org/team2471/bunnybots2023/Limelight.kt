@@ -5,10 +5,12 @@ import edu.wpi.first.networktables.NetworkTableInstance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.bucketWidth
+import org.team2471.bunnybots2023.Limelight.cl
 import org.team2471.bunnybots2023.Limelight.limeLightToTarget
 import org.team2471.bunnybots2023.Limelight.limelightScreenWidth
 import org.team2471.bunnybots2023.Limelight.limelightStaticAngle
 import org.team2471.bunnybots2023.Limelight.targetTopHeight
+import org.team2471.bunnybots2023.Limelight.totalLatency
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsLengthEntry
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsXEntry
 import org.team2471.bunnybots2023.Limelight.vBotCentCoordsYEntry
@@ -28,6 +30,8 @@ import kotlin.math.pow
 object Limelight : Subsystem("Limelight") {
     private val datatable = NetworkTableInstance.getDefault().getTable("limelight-front")
     private val validTargetsEntry = datatable.getEntry("tv")
+    private val tl = datatable.getEntry("tl")
+    private val cl = datatable.getEntry("cl")
     private val ledModeEntry = datatable.getEntry("ledMode")
 
     private val table = NetworkTableInstance.getDefault().getTable("Limelight")
@@ -42,6 +46,9 @@ object Limelight : Subsystem("Limelight") {
 
 
     val advantageBucketPose = table.getEntry("Advantage Bucket Pose")
+
+    val totalLatency: Double
+        get() = cl.getDouble(0.0) + tl.getDouble(0.0)
 
     private const val lengthHeightMinRatio = 2.5
     val limelightHeight = 32.inches
@@ -236,10 +243,11 @@ data class BucketTarget (
         get() {
             var x = dist.asInches
 //            return 14.109 * kotlin.math.tan(0.013571 * x)
-            return (0.0000453727 * x.pow(3)) - (0.00233868 * x.pow(2)) + (0.229364 * x)
+            //                                                                                    ↓ this is limelight latency! keep this
+            return (0.0000453727 * x.pow(3)) - (0.00233868 * x.pow(2)) + (0.229364 * x) + ((totalLatency / 1000) * 50)
         }
 
-    fun pBotCentCoords(ticks: Int): Vector2{
+    fun pBotCentCoords(ticks: Double): Vector2{
 
         if (vBotCentCoords.length in vMin..vMax){
 //            println(vBotCentCoords.times(ticks.toDouble()))

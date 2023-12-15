@@ -1,6 +1,7 @@
 package org.team2471.bunnybots2023
 
 import com.ctre.phoenix.motorcontrol.FeedbackDevice
+import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.AnalogInput
 import edu.wpi.first.wpilibj.DriverStation
@@ -33,6 +34,9 @@ object Turret : Subsystem("Turret") {
     val encoderVoltageEntry = table.getEntry("Raw Encoder Voltage")
     val pBotCentCoordsAngleEntry = table.getEntry("PredBotCentCoord Angle (50)")
 
+    var ticks = 0.0
+    val ticksFilter = LinearFilter.movingAverage(5)
+
     const val minJoystickDistance = 0.5
 
     // Same direction
@@ -62,11 +66,15 @@ object Turret : Subsystem("Turret") {
     val turretError: Angle
         get() = turretSetpoint.toRobotCentric() - turretAngle
 
+    var rawTurretSetpoint: Angle = 0.0.degrees
+
+
     // in field centric
     var turretSetpoint: Angle = 0.0.degrees
         set(value) {
+
 //            println("HI!!!")
-            var angle = value.toRobotCentric() + turretSetpointOffset
+            var angle = value.toRobotCentric() //+ turretSetpointOffset
 
             val minDist = (angle - minAngle).wrap()
             val maxDist = (angle - maxAngle).wrap()
@@ -117,6 +125,7 @@ object Turret : Subsystem("Turret") {
                     turretSetpointOffset = (OI.operatorRightX).degrees
 //                    println("stick = ${OI.operatorRightX}")
                 }
+                turretSetpoint = rawTurretSetpoint
             }
         }
     }
@@ -143,13 +152,13 @@ object Turret : Subsystem("Turret") {
                     aimAtBucket(target)
 
                 } else {
-                    turretSetpoint = joystickTarget
+                    rawTurretSetpoint = joystickTarget
                 }
 
             } else if (Limelight.enemyBuckets.isNotEmpty()) {
                 aimAtBucket(Limelight.enemyBuckets[0])
             } else {
-                turretSetpoint = turretSetpoint
+                rawTurretSetpoint = rawTurretSetpoint
 //                println("setpoint = $turretSetpoint")
             }
 
@@ -165,14 +174,14 @@ object Turret : Subsystem("Turret") {
     }
 
     override fun preEnable() {
-        turretSetpoint = turretAngle.toFieldCentric()
+        rawTurretSetpoint = turretAngle.toFieldCentric()
     }
 
     fun aimAtBucket(target : BucketTarget){
-        val ticks = target.ticksToTarget
+        ticks = target.ticksToTarget
 
 //        println(ticks)
-        turretSetpoint = target.pBotCentCoords(ticks.toInt()).angle
+        rawTurretSetpoint = target.pBotCentCoords(ticksFilter.calculate(ticks)).angle
 //        println(angle - target.botCentCoords.angle)
 //        pBotCentCoordsAngleEntry.setDouble(target.pBotCentCoords(20).angle.asDegrees)
 //        println(target.vAngle)
@@ -181,18 +190,18 @@ object Turret : Subsystem("Turret") {
     fun turretRight() {
 //        turningMotor.setPercentOutput(0.5)
 //        delay(0.5)
-        turretSetpoint = 90.0.degrees
+        rawTurretSetpoint = 90.0.degrees
     }
 
     fun zeroTurret() {
         turningMotor.setRawOffset(0.0)
-        turretSetpoint = turretAngle.toFieldCentric()
+        rawTurretSetpoint = turretAngle.toFieldCentric()
     }
 
 
     fun turretLeft() {
 //        turningMotor.setPercentOutput(0.0)
-        turretSetpoint = (-90.0).degrees
+        rawTurretSetpoint = (-90.0).degrees
     }
 
 }

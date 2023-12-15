@@ -13,7 +13,7 @@ suspend fun fire() = use(Shooter) {
         println(
             "limelight specs! Turret Offset: ${Turret.turretError}, ticks ahead: ${Limelight.enemyBuckets[0].ticksToTarget}, bucket velocity: ${Limelight.enemyBuckets[0].vBotCentCoords.length}, botcentcoords: ${Limelight.enemyBuckets[0].botCentCoords}, pBotcentcoords${
                 Limelight.enemyBuckets[0].pBotCentCoords(
-                    Limelight.enemyBuckets[0].ticksToTarget.toInt()
+                    Limelight.enemyBuckets[0].ticksToTarget
                 )
             }"
         )
@@ -42,7 +42,7 @@ suspend fun fire() = use(Shooter) {
     Shooter.uptakeMotor.setPercentOutput(1.0)
     delay(0.1)
     Shooter.reverseBall = false
-    Intake.ballPast = ballWasLoaded
+    Intake.ballPast = true
 
 }
 suspend fun holdFire() = use(Shooter) {
@@ -59,6 +59,14 @@ suspend fun holdFire() = use(Shooter) {
     Intake.ballPast = ballWasLoaded
 }
 suspend fun toggleBallCollection() = use(Shooter, Intake) {
+//    if (Shooter.disableUptake) {
+//        Shooter.disableUptake = false
+//        Intake.disableConveyor = false
+//    } else {
+//        Shooter.disableUptake = true
+//        Intake.disableConveyor = true
+//    }
+
     if (Shooter.disableUptake) {
         Shooter.disableUptake = false
         Intake.disableConveyor = false
