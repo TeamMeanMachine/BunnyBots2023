@@ -167,9 +167,12 @@ object AutoChooser {
                 }
             })
             val t = Timer()
+            val tTwo = Timer()
+            var blindTime = 0.0
             var waiting = false
             var shooting = false
             var looking = true
+            tTwo.start()
             periodic {
                 if (Robot.isAutonomous) {
                     if (Limelight.seesTargets) {
@@ -230,6 +233,20 @@ object AutoChooser {
                                 )
                                 Turret.rawTurretSetpoint += 1.0.degrees
                                 println("looking")
+                            }
+                            if (looking && !shooting && !waiting && tTwo.get() - blindTime > 2.0) {
+                                println("GONNA DRIVE NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
+                                Drive.drive(
+                                    Vector2(0.0, 1.0),
+                                    0.0, false
+                                )
+                            } else {
+                                blindTime = tTwo.get()
+                                Drive.drive(
+                                    Vector2(0.0, 0.0),
+                                    0.0,
+                                    false
+                                )
                             }
                         }
                         //   turret shoot at target
