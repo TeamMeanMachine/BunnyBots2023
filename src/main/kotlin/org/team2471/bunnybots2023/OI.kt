@@ -77,6 +77,7 @@ object OI : Subsystem("OI") {
         operatorController::back.whenTrue { Turret.zeroTurret() }
         operatorController::start.whenTrue { Turret.turretPredAim = !Turret.turretPredAim }
         ({ operatorController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }
+        operatorController::a.whenTrue { Turret.autoAim = !Turret.autoAim}
 //        ({operatorController.dPad == Controller.Direction.LEFT}).whenTrue {
 //            Turret.turretLeft()
 //        }

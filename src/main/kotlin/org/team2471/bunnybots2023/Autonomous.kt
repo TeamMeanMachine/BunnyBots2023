@@ -176,7 +176,7 @@ object AutoChooser {
 
 //                        println("driving to bucket at robot centric:${Limelight.enemyBuckets[0].botCentCoords}  field centric: ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position} ")
 
-                        if (Limelight.enemyBuckets[0].dist > 3.0.feet) {
+                        if (Limelight.enemyBuckets[0].dist > 4.0.feet) {
                             Drive.drive(
                                 Vector2(
                                     Limelight.enemyBuckets[0].botCentCoords.x  /*Limelight.botCentFilterX.calculate(Limelight.enemyBuckets[0].botCentCoords.x)*/,
@@ -211,6 +211,7 @@ object AutoChooser {
                                     waiting = true
                                     t.start()
                                 }
+
                                 println("shooting")
                             } else if (looking) {
                                 if (Turret.turretError.asDegrees.absoluteValue < 5.0 && Limelight.enemyBuckets[0].dist < 5.0.feet && Shooter.ballReady) {
