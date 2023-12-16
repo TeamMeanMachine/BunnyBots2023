@@ -91,6 +91,8 @@ object Turret : Subsystem("Turret") {
         }
     var turretSetpointOffset: Angle = 0.0.degrees
 
+    var turretPredAim = true
+
     init {
 //        println("*******************************************************************************************************")
         turningMotor.restoreFactoryDefaults()
@@ -178,13 +180,17 @@ object Turret : Subsystem("Turret") {
     }
 
     fun aimAtBucket(target : BucketTarget){
-        ticks = target.ticksToTarget
+        if (turretPredAim) {
+            ticks = target.ticksToTarget
 
 //        println(ticks)
-        rawTurretSetpoint = target.pBotCentCoords(ticksFilter.calculate(ticks)).angle
+            rawTurretSetpoint = target.pBotCentCoords(2.0/*ticksFilter.calculate(ticks)*/).angle
 //        println(angle - target.botCentCoords.angle)
 //        pBotCentCoordsAngleEntry.setDouble(target.pBotCentCoords(20).angle.asDegrees)
 //        println(target.vAngle)
+        } else {
+            rawTurretSetpoint = target.angle
+        }
     }
 
     fun turretRight() {

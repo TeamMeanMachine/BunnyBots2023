@@ -127,7 +127,7 @@ wrapper {
 
 compileKotlin {
     kotlinOptions.jvmTarget = JavaVersion.VERSION_17
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    kotlinOptions.freeCompilerArgs += "-opt-in=kotlin.RequiresOptIn"
 
     sourceCompatibility = JavaVersion.VERSION_17
     targetCompatibility = JavaVersion.VERSION_17

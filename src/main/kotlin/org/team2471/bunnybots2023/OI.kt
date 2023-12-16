@@ -72,6 +72,7 @@ object OI : Subsystem("OI") {
         operatorController::rightTriggerFullPress.whenTrue { fire() }
         operatorController::b.whenTrue { toggleBallCollection() }
         operatorController::back.whenTrue { Turret.zeroTurret() }
+        operatorController::start.whenTrue { Turret.turretPredAim = !Turret.turretPredAim }
         ({ operatorController.dPad == Controller.Direction.DOWN}).whenTrue { Limelight.toggleLight() }
 //        ({operatorController.dPad == Controller.Direction.LEFT}).whenTrue {
 //            Turret.turretLeft()
