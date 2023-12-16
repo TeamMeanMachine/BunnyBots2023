@@ -3,6 +3,8 @@ package org.team2471.bunnybots2023
 import edu.wpi.first.math.filter.LinearFilter
 import edu.wpi.first.networktables.NetworkTableEntry
 import edu.wpi.first.networktables.NetworkTableInstance
+import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.DriverStation.Alliance
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.bunnybots2023.Limelight.bucketWidth
@@ -85,13 +87,18 @@ object Limelight : Subsystem("Limelight") {
                 enemyBuckets = identifyBuckets()
 //                println("HI: ${enemyBuckets.isNotEmpty()}")
                 if (enemyBuckets.isNotEmpty()) {
+//                    for (target in enemyBuckets) {
+//                        println("hi: ${(DriverStation.getAlliance().name)}")
+//                    }
 //                    for (i in filteredTargets!!) {
 //                        println("ID: ${i.id}, IsRed: ${i.isRed} IsValid: ${i.isRed == FieldManager.isBlueAlliance}")
 //                    }
+
                     enemyBuckets = enemyBuckets.filter {
-                        it.isRed == AutoChooser.redSide
+                        it.isRed != (DriverStation.getAlliance().name.equals("Red"))
                     }
                     if (prevEnemyBuckets.isNotEmpty() && enemyBuckets.isNotEmpty()) {
+                        println("hi2: ${enemyBuckets[0].isRed}")
                         enemyBuckets[0].prevTarget = prevEnemyBuckets[0]
                         vBotCentCoordsLengthEntry.setDouble(enemyBuckets[0].vBotCentCoords.length * 50)
                         botCentCoordsXEntry.setDouble(enemyBuckets[0].botCentCoords.x)
