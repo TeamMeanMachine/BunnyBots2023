@@ -6,9 +6,6 @@ import edu.wpi.first.wpilibj.DriverStation
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import org.team2471.frc.lib.coroutines.delay
 //import org.team2471.frc.lib.coroutines.delay
 import org.team2471.frc.lib.coroutines.parallel
 import org.team2471.frc.lib.coroutines.periodic
@@ -19,10 +16,13 @@ import org.team2471.frc.lib.motion.following.drive
 import org.team2471.frc.lib.motion.following.driveAlongPath
 import org.team2471.frc.lib.motion_profiling.Autonomi
 import org.team2471.frc.lib.units.degrees
+import org.team2471.frc.lib.units.feet
+import org.team2471.frc.lib.units.inches
 import org.team2471.frc.lib.util.Timer
 import org.team2471.frc.lib.util.measureTimeFPGA
 import java.io.File
 import java.util.*
+import kotlin.math.absoluteValue
 
 private lateinit var autonomi: Autonomi
 
@@ -135,52 +135,102 @@ object AutoChooser {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    private suspend fun bunnyBot2023() = use(Drive) {
+    private suspend fun bunnyBot2023() = use(Drive, Shooter) {
         println("inside bunnyBot2023() auto function")
         Drive.initializeSteeringMotors()
         Drive.zeroGyro()
+        Limelight.ledModeEntry.setDouble(0.0)
         val totePath = autonomi["BunnyBot2023"]?.get("MoveToTotes")
+        var doneWithPath = false
         if (totePath != null) {
             parallel({
                 println("GONNA DRIVE NOWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW")
                 Drive.driveAlongPath(totePath, true)
+                doneWithPath = true
             }, {
                 val t = Timer()
                 var waitTime = 0.0
                 t.start()
                 periodic {
-                    if (Limelight.seesTargets && t.get() - waitTime > 1.0 || !Robot.isAutonomous) {
-                        println("saw target for more then 1 second, aborting path")
+                    if (doneWithPath) {
                         Drive.abortPath()
                         this.stop()
                     } else {
-                        waitTime = t.get()
+                        if (Limelight.seesTargets /*&& t.get() - waitTime > 1.0*/ || !Robot.isAutonomous) {
+                            println("saw target for more then 1 second, aborting path")
+                            doneWithPath = true
+                        } else {
+                            waitTime = t.get()
+                        }
                     }
+
                 }
             })
             val t = Timer()
-            var seeTime = 0.0
-            t.start()
+            var waiting = false
+            var shooting = false
+            var looking = true
             periodic {
                 if (Robot.isAutonomous) {
                     if (Limelight.seesTargets) {
-                        println("driving to bucket at ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position}")
 
-                        Drive.drive(
-                            Vector2(
-                                Limelight.enemyBuckets[0].botCentCoords.y/*Limelight.botCentFilterX.calculate(Limelight.enemyBuckets[0].botCentCoords.x)*/,
-                                Limelight.enemyBuckets[0].botCentCoords.x/*Limelight.botCentFilterY.calculate(Limelight.enemyBuckets[0].botCentCoords.y)*/
-                            ),
-                            0.0,
-                            false
-                        )
-                        if (t.get() - seeTime > 1.0) {
-                            println("saw target for more then 1 second, shooting")
-                            Shooter.uptakeMotor.setPercentOutput(1.0)// <- this may or may not work
-                        } else if (t.get() - seeTime > 1.2) {
-                            println("shot ball stopping uptake")
-                            Shooter.uptakeMotor.setPercentOutput(0.0)
-                            seeTime = t.get()
+//                        println("driving to bucket at robot centric:${Limelight.enemyBuckets[0].botCentCoords}  field centric: ${Limelight.enemyBuckets[0].botCentCoords + Drive.position} from ${Drive.position} ")
+
+                        if (Limelight.enemyBuckets[0].dist > 3.0.feet) {
+                            Drive.drive(
+                                Vector2(
+                                    Limelight.enemyBuckets[0].botCentCoords.x  /*Limelight.botCentFilterX.calculate(Limelight.enemyBuckets[0].botCentCoords.x)*/,
+                                    Limelight.enemyBuckets[0].botCentCoords.y/*Limelight.botCentFilterY.calculate(Limelight.enemyBuckets[0].botCentCoords.y)*/
+                                ).normalize() * 0.5,
+                                0.0,
+                                false
+                            )
+                        }
+                        if (Limelight.enemyBuckets.isNotEmpty()) {
+                            println("turret Error ${Turret.turretError.asDegrees.absoluteValue} distance ${Limelight.enemyBuckets[0].dist} ")
+                        }
+
+                        if (Limelight.enemyBuckets.isNotEmpty()) {
+                            if (waiting) {
+                                Shooter.uptakeMotor.setPercentOutput(0.0)
+                                if (t.get() > 1.0) {
+                                    waiting = false
+                                    looking = true
+                                }
+                                println("waiting")
+                                if (!Shooter.ballReady) {
+                                    Shooter.uptakeMotor.setPercentOutput(1.0)
+                                } else {
+                                    Shooter.uptakeMotor.setPercentOutput(0.0)
+                                }
+
+                            } else if (shooting) {
+                                Shooter.uptakeMotor.setPercentOutput(1.0)
+                                if (!Shooter.ballReady) {
+                                    shooting = false
+                                    waiting = true
+                                    t.start()
+                                }
+                                println("shooting")
+                            } else if (looking) {
+                                if (Turret.turretError.asDegrees.absoluteValue < 5.0 && Limelight.enemyBuckets[0].dist < 5.0.feet && Shooter.ballReady) {
+                                    looking = false
+                                    shooting = true
+                                    t.start()
+                                }
+                                if (!Shooter.ballReady) {
+                                    Shooter.uptakeMotor.setPercentOutput(1.0)
+                                } else {
+                                    Shooter.uptakeMotor.setPercentOutput(0.0)
+                                }
+                                Drive.drive(
+                                    Vector2(0.0, 0.0),
+                                    0.0,
+                                    false
+                                )
+                                Turret.rawTurretSetpoint += 1.0.degrees
+                                println("looking")
+                            }
                         }
                         //   turret shoot at target
                     } else {
@@ -189,10 +239,11 @@ object AutoChooser {
                             0.0,
                             false
                         )
+                        Turret.rawTurretSetpoint += 1.0.degrees
+
                         Shooter.uptakeMotor.setPercentOutput(0.0)
-                        println("i no see")
-                        Turret.rawTurretSetpoint += 5.0.degrees
-                        seeTime = t.get()
+                        println("i no see!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+//                        waitTime = t.get()
                     }
                 } else {
                     this.stop()

@@ -3,13 +3,13 @@ package org.team2471.bunnybots2023
 import edu.wpi.first.networktables.NetworkTableInstance
 import edu.wpi.first.wpilibj.DigitalInput
 import edu.wpi.first.wpilibj.DriverStation
+import edu.wpi.first.wpilibj.Timer
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.team2471.frc.lib.actuators.MotorController
 import org.team2471.frc.lib.actuators.TalonID
 import org.team2471.frc.lib.coroutines.periodic
 import org.team2471.frc.lib.framework.Subsystem
-import org.team2471.frc.lib.util.Timer
 
 
 object Shooter : Subsystem("Shooter") {
@@ -27,6 +27,10 @@ object Shooter : Subsystem("Shooter") {
 //    val shooterEncoder = AnalogInput(AnalogSensors.SHOOTER_ENCODER)
     val uptakeMotor = MotorController(TalonID(Talons.HOPPER_UPTAKE))
     val uptakeSensor = DigitalInput(DigitalSensors.HOPPER_HIGH)
+
+    var lastShotTime: Double = Timer.getFPGATimestamp()
+    val timeSinceLastShot: Double
+        get() = Timer.getFPGATimestamp() - lastShotTime
 
 
     var ballReady: Boolean = !uptakeSensor.get()
@@ -71,8 +75,12 @@ object Shooter : Subsystem("Shooter") {
                 disableUptakeEntry.setBoolean(disableUptake)
                 shooterCurrentEntry.setDouble(shooterMotor.current)
                 timeAfterLastShotEntry.setDouble(timeAfterLastShot)
-                if (DriverStation.isEnabled() && ballReady && Limelight.seesTargets/* && timeAfterLastShot > 1.0*/) {
-                    OI.operatorController.rumble = 0.25
+                if (DriverStation.isEnabled() && ballReady && Limelight.seesTargets) {
+                    if (timeSinceLastShot > 1.0) {
+                        OI.operatorController.rumble = 0.25
+                    } else {
+                        OI.operatorController.rumble = 0.1
+                    }
                 } else {
                     OI.operatorController.rumble = 0.0
                 }
@@ -111,5 +119,9 @@ object Shooter : Subsystem("Shooter") {
             }
 
         }
+    }
+
+    fun setLastShotTime() {
+        lastShotTime = Timer.getFPGATimestamp()
     }
 }

@@ -33,7 +33,7 @@ object Limelight : Subsystem("Limelight") {
     private val validTargetsEntry = datatable.getEntry("tv")
     private val tl = datatable.getEntry("tl")
     private val cl = datatable.getEntry("cl")
-    private val ledModeEntry = datatable.getEntry("ledMode")
+    val ledModeEntry = datatable.getEntry("ledMode")
 
     private val table = NetworkTableInstance.getDefault().getTable("Limelight")
     val vBotCentCoordsXEntry: NetworkTableEntry = table.getEntry("vBotCentCoords X")
@@ -54,10 +54,11 @@ object Limelight : Subsystem("Limelight") {
     private const val lengthHeightMinRatio = 2.5
     val limelightHeight = 32.inches
     val targetElevation = 42.inches
-    val targetHeight = 12.inches
+    val targetHeight: Length
+        get() = if (AutoChooser.redSide) 10.inches else 12.inches
     val targetTopHeight = targetElevation + targetHeight
     val limeLightToTarget = targetTopHeight - limelightHeight
-    val limelightStaticAngle = 33.3.degrees
+    val limelightStaticAngle = 25.7.degrees
     const val limelightScreenWidth = 320
     const val limelightScreenHeight = 320
     const val bucketWidth = 10 + 2/8 // Inches
@@ -82,6 +83,7 @@ object Limelight : Subsystem("Limelight") {
             periodic {
                 val prevEnemyBuckets = enemyBuckets
                 enemyBuckets = identifyBuckets()
+//                println("HI: ${enemyBuckets.isNotEmpty()}")
                 if (enemyBuckets.isNotEmpty()) {
 //                    for (i in filteredTargets!!) {
 //                        println("ID: ${i.id}, IsRed: ${i.isRed} IsValid: ${i.isRed == FieldManager.isBlueAlliance}")

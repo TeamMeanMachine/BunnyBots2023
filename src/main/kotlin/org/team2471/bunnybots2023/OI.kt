@@ -30,6 +30,9 @@ object OI : Subsystem("OI") {
     val driveLeftTrigger: Double
         get() = driverController.leftTrigger
 
+    val driveLeftTriggerFullPress: Boolean
+        get() = driverController.leftTriggerFullPress
+
     val driveRightTrigger: Double
         get() = driverController.rightTrigger
 

@@ -262,7 +262,9 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             var turn = 0.0
             if (OI.driveRotation.absoluteValue > 0.001) {
                 turn = OI.driveRotation
-                turn = linearMap(0.0,90.0,turn,turn * 0.5, Turret.turretError.asDegrees)
+                if (!OI.driveLeftTriggerFullPress) {
+                    turn = linearMap(0.0, 90.0, turn, turn * 0.5, Turret.turretError.asDegrees)
+                }
             }
 
             if (!useGyroEntry.exists()) {

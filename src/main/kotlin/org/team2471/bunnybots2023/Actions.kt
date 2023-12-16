@@ -9,6 +9,7 @@ import kotlin.math.absoluteValue
 
 suspend fun fire() = use(Shooter) {
     println("FIRING!!!! IM SHOOTING BALL")
+    Shooter.setLastShotTime()
     if (Limelight.enemyBuckets.isNotEmpty()) {
         println(
             "limelight specs! Turret Offset: ${Turret.turretError}, ticks ahead: ${Limelight.enemyBuckets[0].ticksToTarget}, bucket velocity: ${Limelight.enemyBuckets[0].vBotCentCoords.length}, botcentcoords: ${Limelight.enemyBuckets[0].botCentCoords}, pBotcentcoords${
