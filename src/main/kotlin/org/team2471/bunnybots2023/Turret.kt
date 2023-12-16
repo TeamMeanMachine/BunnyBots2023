@@ -90,7 +90,7 @@ object Turret : Subsystem("Turret") {
             field = angle.toFieldCentric()
         }
     var turretSetpointOffset: Angle = 0.0.degrees
-
+    var autoAim = true
     var turretPredAim = true
 
     init {
@@ -180,16 +180,18 @@ object Turret : Subsystem("Turret") {
     }
 
     fun aimAtBucket(target : BucketTarget){
-        if (turretPredAim) {
-            ticks = target.ticksToTarget
+        if(autoAim) {
+            if (turretPredAim) {
+                ticks = target.ticksToTarget
 
 //        println(ticks)
-            rawTurretSetpoint = target.pBotCentCoords(2.0/*ticksFilter.calculate(ticks)*/).angle
+                rawTurretSetpoint = target.pBotCentCoords(2.0/*ticksFilter.calculate(ticks)*/).angle
 //        println(angle - target.botCentCoords.angle)
 //        pBotCentCoordsAngleEntry.setDouble(target.pBotCentCoords(20).angle.asDegrees)
 //        println(target.vAngle)
-        } else {
-            rawTurretSetpoint = target.angle
+            } else {
+                rawTurretSetpoint = target.angle
+            }
         }
     }
 
