@@ -249,6 +249,11 @@ data class BucketTarget (
         get() {
             return botCentCoords - (prevTarget?.botCentCoords ?: botCentCoords)
         }
+    val vDist: Length
+        get() {
+            return dist - (prevTarget?.dist ?: dist)
+        }
+
 
 
     val ticksToTarget: Double //Given to you by desmos nonlinear regression!

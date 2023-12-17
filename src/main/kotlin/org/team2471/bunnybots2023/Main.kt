@@ -111,10 +111,10 @@ object Robot : MeanlibRobot() {
         println("test mode begin. Hi.")
 
 //        turretOITest()
-//        Drive.steeringTests()
-//        Drive.driveTests()
+        Drive.steeringTests()
+        Drive.driveTests()
 
-        Drive.setAngleOffsets()
+//        Drive.setAngleOffsets()
 
         //val selectedTest = SmartDashboard.getString("RobotTests/selected", "None")
 

@@ -140,6 +140,7 @@ object AutoChooser {
         Drive.initializeSteeringMotors()
         Drive.zeroGyro()
         Limelight.ledModeEntry.setDouble(0.0)
+        Intake.intakeUp()
         val totePath = autonomi["BunnyBot2023"]?.get("MoveToTotes")
         var doneWithPath = false
         if (totePath != null) {
@@ -196,7 +197,7 @@ object AutoChooser {
                         if (Limelight.enemyBuckets.isNotEmpty()) {
                             if (waiting) {
                                 Shooter.uptakeMotor.setPercentOutput(0.0)
-                                if (t.get() > 1.0) {
+                                if (t.get() > 1.2) {
                                     waiting = false
                                     looking = true
                                 }
@@ -227,11 +228,22 @@ object AutoChooser {
                                 } else {
                                     Shooter.uptakeMotor.setPercentOutput(0.0)
                                 }
-                                Drive.drive(
-                                    Vector2(0.0, 0.0),
-                                    0.0,
-                                    false
-                                )
+                                if (Limelight.enemyBuckets[0].dist < 5.0.feet) {
+                                    Drive.drive(
+                                        Vector2(0.0, 0.0),
+                                        0.0,
+                                        false
+                                    )
+                                } else {
+                                    Drive.drive(
+                                        Vector2(
+                                            Limelight.enemyBuckets[0].botCentCoords.x  /*Limelight.botCentFilterX.calculate(Limelight.enemyBuckets[0].botCentCoords.x)*/,
+                                            Limelight.enemyBuckets[0].botCentCoords.y/*Limelight.botCentFilterY.calculate(Limelight.enemyBuckets[0].botCentCoords.y)*/
+                                        ).normalize() * 0.5,
+                                        0.0,
+                                        false
+                                    )
+                                }
                                 Turret.rawTurretSetpoint += 1.0.degrees
                                 println("looking")
                             }
