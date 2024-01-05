@@ -47,6 +47,7 @@ object Robot : MeanlibRobot() {
 
         OI
         println("Activating Drive!")
+        Drive
         Turret
         println("Activating Turret! ${Turret.turretSetpoint}")
         Limelight
@@ -57,7 +58,6 @@ object Robot : MeanlibRobot() {
 //        println("Activating Intake!")
         Shooter
         println("Activating Shooter!")
-        Drive
         Drive.zeroGyro()
         Drive.heading = 0.0.degrees
         Intake

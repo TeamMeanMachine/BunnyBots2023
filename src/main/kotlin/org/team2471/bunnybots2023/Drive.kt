@@ -70,6 +70,21 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
     val rateCurve = MotionCurve()
 
+
+    override val parameters: SwerveParameters = SwerveParameters(
+        gyroRateCorrection = 0.0,
+        kpPosition = 0.32,
+        kdPosition = 0.6,
+        kPositionFeedForward = 0.05,
+        kpHeading = 0.005,
+        kdHeading = 0.02,
+        kHeadingFeedForward = 0.001,
+        kMoveWhileSpin = 0.0,
+        invertDriveFactor = -1.0,
+        invertSteerFactor = -1.0
+    )
+
+
     /**
      * Coordinates of modules
      * **/
@@ -132,17 +147,6 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         get() = Vector2(0.0, 0.0)
     override var robotPivot = Vector2(0.0, 0.0)
     override var headingSetpoint = 0.0.degrees
-
-    override val parameters: SwerveParameters = SwerveParameters(
-        gyroRateCorrection = 0.0,
-        kpPosition = 0.32,
-        kdPosition = 0.6,
-        kPositionFeedForward = 0.05,
-        kpHeading = 0.005,
-        kdHeading = 0.02,
-        kHeadingFeedForward = 0.001,
-        kMoveWhileSpin = 0.0,
-    )
 
     override val carpetFlow = Vector2(0.0, 1.0)
     override val kCarpet = 0.0104 // how much downstream and upstream carpet directions affect the distance, for no effect, use  0.0 (2.5% more distance downstream)
@@ -336,7 +340,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         }
 
         override val angle: Angle
-            get() = -turnMotor.position.degrees
+            get() = turnMotor.position.degrees * parameters.invertSteerFactor
 
         val digitalEncoder : DutyCycleEncoder = DutyCycleEncoder(digitalInputID)
 
@@ -358,11 +362,11 @@ object Drive : Subsystem("Drive"), SwerveDrive {
 
         val power: Double
             get() {
-                return -driveMotor.output
+                return driveMotor.output * parameters.invertDriveFactor
             }
 
         override val currDistance: Double
-            get() = -driveMotor.position
+            get() = driveMotor.position * parameters.invertDriveFactor
 
         override var prevDistance: Double = 0.0
 
@@ -375,10 +379,10 @@ object Drive : Subsystem("Drive"), SwerveDrive {
         }
 
         override var angleSetpoint: Angle = 0.0.degrees
-            set(value) = turnMotor.setPositionSetpoint(-(angle + (value - angle).wrap()).asDegrees)
+            set(value) = turnMotor.setPositionSetpoint(value.unWrap(angle).asDegrees * parameters.invertSteerFactor)
 
         override fun setDrivePower(power: Double) {
-            driveMotor.setPercentOutput(-power)
+            driveMotor.setPercentOutput(power * parameters.invertDriveFactor)
         }
 
 
