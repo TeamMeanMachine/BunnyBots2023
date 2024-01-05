@@ -362,7 +362,7 @@ object Drive : Subsystem("Drive"), SwerveDrive {
             }
 
         override val currDistance: Double
-            get() = driveMotor.position
+            get() = -driveMotor.position
 
         override var prevDistance: Double = 0.0
 
